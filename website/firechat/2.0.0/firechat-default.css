@@ -621,9 +621,9 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
   height: 24px;
   display: inline-block;
   *display: inline;
