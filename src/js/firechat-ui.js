@@ -139,6 +139,11 @@
 
     _onEnterRoom: function(room) {
       this.attachTab(room.id, room.name);
+      this._chat.getRoom(room.id, function(room){
+        if( room.type === 'public'){
+          $('#close-tab').fadeOut();
+        }
+      });
     },
     _onLeaveRoom: function(roomId) {
       this.removeTab(roomId);

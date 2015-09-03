@@ -585,7 +585,7 @@
     overflow: auto;
     -ms-overflow-x: hidden;
     overflow-x: hidden;
-    height: 290px;
+    height: 330px;
     position: relative;
     margin-bottom: 5px;
     border: 1px solid #cccccc;
@@ -598,7 +598,7 @@
   }
   .message {
     color: #333;
-    padding: 3px 5px;
+    padding: 8px;
     border-bottom: 1px solid #ccc;
     &.highlighted {
       background-color: #d9edf7;
@@ -607,6 +607,7 @@
   .message .name {
     font-weight: bold;
     overflow-x: hidden;
+    padding-bottom: 2px;
   }
   .message.message-self {
     color: #2675ab;
@@ -643,7 +644,7 @@
     height: 40px;
   }
   #firechat-tabs {
-    height: 435px;
+   /* height: 435px; */
   }
   #firechat-tab-list {
     background-color: #ffffff;
@@ -708,4 +709,12 @@
   a > .icon {
     margin: 3px 1px;
   }
+}
+
+#twitter-link a:visited{
+  color: #292f33;
+}
+
+#twitter-link a:hover, a:focus, a:active {
+   color:#2b7bb9;
 }
