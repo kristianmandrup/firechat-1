@@ -1,7 +1,7 @@
 <div class='message message-<%- type %> <% if (isSelfMessage) { %> message-self <% } %>' data-message-id='<%- id %>' data-user-id='<%- userId %>' data-user-name='<%- name %>' data-class="firechat-message">
   <div class='clearfix'>
-    <label class='fourfifth'>
-      <strong class='name' title='<%- name %>'><%- name %></strong>
+    <label id="twitter-link" class='fourfifth'>
+      <a href="https://twitter.com/intent/user?user_id=<%- userId.slice(8) %>" target="_blank"> <strong class='name' title='<%- name %>'><%- name %></strong></a>
       <em>(<%- localtime %>)</em>:
     </label>
 
