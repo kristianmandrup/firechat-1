@@ -325,7 +325,8 @@
 
       self._rooms[roomId] = true;
 
-      if (self._user) {
+/*    We need not to store the sessions/room with each user
+        if (self._user) {
         // Save entering this room to resume the session again later.
         self._userRef.child('rooms').child(roomId).set({
           id: roomId,
@@ -340,7 +341,7 @@
           name: self._userName
         }, null);
       }
-
+*/
       // Invoke our callbacks before we start listening for new messages.
       self._onEnterRoom({ id: roomId, name: roomName });
 
