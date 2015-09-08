@@ -165,26 +165,34 @@
 
     // Events related to chat invitations.
     _onChatInvite: function(invitation) {
-      var self = this;
-      var template = FirechatDefaultTemplates["templates/prompt-invitation.html"];
-      var $prompt = this.prompt('Invite', template(invitation));
-      $prompt.find('a.close').click(function() {
-        $prompt.remove();
-        self._chat.declineInvite(invitation.id);
-        return false;
-      });
 
-      $prompt.find('[data-toggle=accept]').click(function() {
-        $prompt.remove();
-        self._chat.acceptInvite(invitation.id);
-        return false;
-      });
+     if(document.getElementById(invitation.id) === null)
+      {
+        var self = this;
+        var template = FirechatDefaultTemplates["templates/prompt-invitation.html"];
+        var $prompt = this.prompt('Invite', template(invitation));
 
-      $prompt.find('[data-toggle=decline]').click(function() {
-        $prompt.remove();
-        self._chat.declineInvite(invitation.id);
-        return false;
-      });
+       var ele = document.getElementById("prompt-invi");
+       ele.setAttribute('id', invitation.id);
+
+        $prompt.find('a.close').click(function() {
+          $prompt.remove();
+          self._chat.declineInvite(invitation.id);
+          return false;
+        });
+
+        $prompt.find('[data-toggle=accept]').click(function() {
+          $prompt.remove();
+          self._chat.acceptInvite(invitation.id);
+          return false;
+        });
+
+        $prompt.find('[data-toggle=decline]').click(function() {
+          $prompt.remove();
+          self._chat.declineInvite(invitation.id);
+          return false;
+        });
+      }
     },
     _onChatInviteResponse: function(invitation) {
       if (!invitation.status) return;
@@ -594,6 +602,7 @@
               $prompt;
 
           self._chat.getRoom(roomId, function(room) {
+
             $prompt = self.prompt('Invite', template({
               userName: userName,
               roomName: room.name
@@ -619,6 +628,7 @@
           return false;
         },
         renderPrivateInvitePrompt = function(event) {
+
           var $this = $(this),
               userId = $this.closest('[data-user-id]').data('user-id'),
               userName = $this.closest('[data-user-name]').data('user-name'),
