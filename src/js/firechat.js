@@ -320,7 +320,10 @@
 
       // Skip if we're already in this room.
       if (self._rooms[roomId]) {
-        return;
+        //return;
+
+        //this is a hack to make the disabled action(private chat invite and block symobls visible on first sign in)
+        self.leaveRoom(roomId);
       }
 
       self._rooms[roomId] = true;
