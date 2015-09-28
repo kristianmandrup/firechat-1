@@ -264,6 +264,7 @@
       } else {
         self.warn('Firechat requires an authenticated Firebase reference. Pass an authenticated reference before loading.');
       }
+
     });
   };
 
@@ -272,9 +273,24 @@
     this._userRef.child('rooms').once('value', function(snapshot) {
       var rooms = snapshot.val();
       for (var roomId in rooms) {
-        this.enterRoom(rooms[roomId].id);
+        if( rooms[roomId].name === 'Private Chat'){
+          this.enterRoom(rooms[roomId].id);
+        }
       }
     }, /* onError */ function(){}, /* context */ this);
+  };
+
+  Firechat.prototype.removeSessions = function( callback ) { 
+     this._userRef.child('rooms').once('value', function(snapshot) {
+      var rooms = snapshot.val();
+      for (var roomId in rooms) {
+        if( rooms[roomId].name === 'Private Chat'){
+          this.leaveRoom(rooms[roomId].id);
+        }
+      }
+    }, /* onError */ function(){}, /* context */ this);
+
+     callback();
   };
 
   // Callback registration. Supports each of the following events:
@@ -325,8 +341,7 @@
 
       self._rooms[roomId] = true;
 
-/*    We need not to store the sessions/room with each user
-        if (self._user) {
+      if (self._user) {
         // Save entering this room to resume the session again later.
         self._userRef.child('rooms').child(roomId).set({
           id: roomId,
@@ -341,7 +356,7 @@
           name: self._userName
         }, null);
       }
-*/
+
       // Invoke our callbacks before we start listening for new messages.
       self._onEnterRoom({ id: roomId, name: roomName });
 

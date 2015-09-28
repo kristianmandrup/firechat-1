@@ -254,7 +254,7 @@
         self._bindSuperuserUIEvents();
       }
 
-      //self._chat.resumeSession();
+      self._chat.resumeSession();
     });
   };
 
