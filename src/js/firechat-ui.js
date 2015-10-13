@@ -1093,7 +1093,18 @@
 
     hours = (hours > 12) ? hours - 12 : hours;
     minutes = (minutes.length < 2) ? '0' + minutes : minutes;
-    return '' + hours + ':' + minutes + ampm;
+
+    var dateAndTime = '' + hours + ':' + minutes + ampm; 
+    if(timestamp) {
+      var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      if((date.getFullYear())!=(new Date().getFullYear()))
+        return '' + monthNames[date.getMonth()] + ' ' + date.getDate() + ' ' +date.getFullYear() + ' at '+dateAndTime;
+      
+      if((date.getDate()!=new Date().getDate()) || (date.getMonth()!=new Date().getMonth()) )
+        return '' + monthNames[date.getMonth()] + ' ' + date.getDate() + ' at '+ dateAndTime;
+    }
+
+    return dateAndTime;
   };
 
   /**
