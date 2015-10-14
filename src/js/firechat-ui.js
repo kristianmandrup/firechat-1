@@ -920,7 +920,8 @@
     // Populate and render the tab menu template.
     var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
     var $tab = $(tabListTemplate(room));
-    this.$tabList.prepend($tab);
+    this.$tabList.append($tab);
+    this.$tabList.find('a').first().children().removeClass('close');
 
     // Attach on-shown event to move tab to front and scroll to bottom.
     $tab.bind('shown', function(event) {
