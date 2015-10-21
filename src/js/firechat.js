@@ -47,6 +47,7 @@
     this._userRef        = null;
     this._messageRef     = this._firebase.child('room-messages');
     this._roomRef        = this._firebase.child('room-metadata');
+    this._roomUsers      = this._firebase.child('room-users');
     this._privateRoomRef = this._firebase.child('room-private-metadata');
     this._moderatorsRef  = this._firebase.child('moderators');
     this._suspensionsRef = this._firebase.child('suspensions');
@@ -285,7 +286,7 @@
       var rooms = snapshot.val();
       for (var roomId in rooms) {
         if( rooms[roomId].name === 'Private Chat'){
-          this.leaveRoom(rooms[roomId].id);
+          this.leaveRoom(rooms[roomId].id , false);
         }
       }
     }, /* onError */ function(){}, /* context */ this);
@@ -328,6 +329,7 @@
 
   // Enter a chat room.
   Firechat.prototype.enterRoom = function(roomId) {
+    
     var self = this;
     self.getRoom(roomId, function(room) {
       var roomName = room.name;
@@ -366,7 +368,7 @@
           self._onNewMessage(roomId, snapshot);
         }, /* onCancel */ function() {
           // Turns out we don't have permission to access these messages.
-          self.leaveRoom(roomId);
+          self.leaveRoom(roomId , false);
         }, /* context */ self);
 
         self._messageRef.child(roomId).limitToLast(self._options.numMaxMessages).on('child_removed', function(snapshot) {
@@ -377,21 +379,49 @@
   };
 
   // Leave a chat room.
-  Firechat.prototype.leaveRoom = function(roomId) {
+  Firechat.prototype.leaveRoom = function(roomId ,closebutton) {
     var self = this,
         userRoomRef = self._firebase.child('room-users').child(roomId);
 
     // Remove listener for new messages to this room.
     self._messageRef.child(roomId).off();
+    console.log("LEAVE Room");
+    console.log(closebutton);
+    console.log(roomId);
 
-    if (self._user) {
-      var presenceRef = userRoomRef.child(self._userId).child(self._sessionId);
+  
+      
+    if(closebutton)
+    {     
 
-      // Remove presence bit for the room and cancel on-disconnect removal.
-      self._removePresenceOperation(presenceRef.toString(), null);
+        if (self._user) 
+          {
+              var presenceRef = userRoomRef.child(self._userId).child(self._sessionId);
+              // Remove presence bit for the room and cancel on-disconnect removal.
+              self._removePresenceOperation(presenceRef.toString(), null);
+              // Remove session bit for the room.
+              self._userRef.child('rooms').child(roomId).remove();
+          }
 
-      // Remove session bit for the room.
-      self._userRef.child('rooms').child(roomId).remove();
+
+        self._firebase.child('room-users').child(roomId).on('value',function(data){
+        
+        console.log(data.val());
+        
+        if (data.val())
+        {
+          console.log("Room still there");
+        }
+        else
+        {  
+           self._firebase.child('room-messages').child(roomId).remove();
+           console.log("Room not there");
+        }
+
+    });
+  
+
+
     }
 
     delete self._rooms[roomId];
@@ -434,7 +464,7 @@
   // receipt of each new message.
   Firechat.prototype.toggleUserMute = function(userId, cb) {
     var self = this;
-
+   console.log("Mute User")
     if (!self._user) {
       self._onAuthRequired();
       if (cb) {

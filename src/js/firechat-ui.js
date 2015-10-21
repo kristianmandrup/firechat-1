@@ -161,6 +161,9 @@
     // Events related to chat invitations.
     _onChatInvite: function(invitation) {
 
+
+      console.log("Inviataion")
+
      if(document.getElementById(invitation.id) === null)
       {
         var self = this;
@@ -200,6 +203,7 @@
         $prompt = this.prompt('Accepted', template(invitation));
         this._chat.getRoom(invitation.roomId, function(room) {
           self.attachTab(invitation.roomId, room.name);
+          console.log('###testing##'+room);
         });
       } else {
         $prompt = this.prompt('Declined', template(invitation));
@@ -377,7 +381,8 @@
     // Handle click of tab close button.
     $(document).delegate('[data-event="firechat-close-tab"]', 'click', function(event) {
       var roomId = $(this).closest('[data-room-id]').data('room-id');
-      self._chat.leaveRoom(roomId);
+      console.log('close button pushed')
+      self._chat.leaveRoom(roomId,true);
       return false;
     });
   };
@@ -624,6 +629,10 @@
         },
         renderPrivateInvitePrompt = function(event) {
 
+      if($('#firechat-tab-list > li').length < 3)
+
+
+      {
           var $this = $(this),
               userId = $this.closest('[data-user-id]').data('user-id'),
               userName = $this.closest('[data-user-name]').data('user-name'),
@@ -656,6 +665,26 @@
             });
           }
           return false;
+      }
+
+      else
+      {    
+
+              var template2 = FirechatDefaultTemplates["templates/stop-invite.html"],
+              $prompt2;
+
+             $prompt2 = self.prompt('Stop Invite', template2({
+             }));
+
+            $prompt2.find('[data-toggle=decline]').click(function() {
+              $prompt2.remove();
+              return false;
+            });
+
+
+
+      }
+
         };
 
     $(document).delegate('[data-event="firechat-user-chat"]', 'click', renderPrivateInvitePrompt);
@@ -886,6 +915,8 @@
       this.focusTab(roomId);
       return;
     }
+    console.log("testing 2###");
+
 
     var room = {
       id: roomId,
