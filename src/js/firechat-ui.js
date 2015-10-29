@@ -687,8 +687,47 @@
 
         };
 
+        renderInviteUserPrompt = function(){
+
+          var $this = $(this),
+             // userId = $this.closest('[data-user-id]').data('user-id'),
+              roomId = $this.closest('[data-room-id]').data('room-id'),
+              //userName = $this.closest('[data-user-name]').data('user-name'),
+              template = FirechatDefaultTemplates["templates/prompt-invite-user.html"],
+              $prompt;
+
+          // self._chat.getRoom(roomId, function(room) {
+
+          //   $prompt = self.prompt('Invite', template({
+          //     userName: userName,
+          //     roomName: room.name
+          //   }));
+
+    $prompt = self.prompt('Add people to Group', template({
+      maxLengthRoomName: this.maxLengthRoomName
+    }));
+
+            $prompt.find('a.close').click(function() {
+              $prompt.remove();
+              return false;
+            });
+
+            $prompt.find('[data-toggle=accept]').click(function() {
+              $prompt.remove();
+
+              var name = $prompt.find('[data-input=firechat-twitter-name]').first().val();
+              console.log('invited',name, roomId);
+              return false;
+            });
+
+
+
+
+        };
+
     $(document).delegate('[data-event="firechat-user-chat"]', 'click', renderPrivateInvitePrompt);
     $(document).delegate('[data-event="firechat-user-invite"]', 'click', renderInvitePrompt);
+    $(document).delegate('[data-event="firechat-invite-user"]', 'click', renderInviteUserPrompt);
   };
 
   /**
@@ -698,6 +737,7 @@
     var self = this,
         $createRoomPromptButton = $('#firechat-btn-create-room-prompt'),
         $createRoomButton = $('#firechat-btn-create-room'),
+
         renderRoomList = function(event) {
           var type = $(this).data('room-type');
 
@@ -717,6 +757,7 @@
       self._chat.createRoom(roomName);
       return false;
     });
+
   };
 
   /**
@@ -948,7 +989,8 @@
     var $tab = $(tabListTemplate(room));
     this.$tabList.append($tab);
     this.$tabList.find('a').first().children().removeClass('close');
-
+     this.$tabList.find('a').first().children().hide();
+    
     // Attach on-shown event to move tab to front and scroll to bottom.
     $tab.bind('shown', function(event) {
       $messages.scrollTop($messages[0].scrollHeight);
@@ -1141,7 +1183,7 @@
     var self = this;
     var template = FirechatDefaultTemplates["templates/prompt-create-room.html"];
 
-    var $prompt = this.prompt('Create Public Room', template({
+    var $prompt = this.prompt('Create Group', template({
       maxLengthRoomName: this.maxLengthRoomName,
       isModerator: self._chat.userIsModerator()
     }));
@@ -1172,6 +1214,31 @@
       }
     });
   };
+
+ /**
+   * Launch a prompt to allow the user to Add user handle.
+
+   */
+
+   FirechatUI.prototype.promptInvite = function()
+   {
+       var self = this;
+       var template = FirechatDefaultTemplates["templates/prompt-invite-user.html"];
+
+        var $prompt = this.prompt('INvite User', template({
+      maxLengthRoomName: this.maxLengthRoomName,
+      isModerator: self._chat.userIsModerator()
+    }));
+
+
+    $prompt.find('a.close').first().click(function() {
+      $prompt.remove();
+      return false;
+    });
+
+
+   };
+
 
   /**
    * Inner method to launch a prompt given a specific title and HTML content.
