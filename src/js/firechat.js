@@ -298,8 +298,15 @@
     this._userRef.child('rooms').once('value', function(snapshot) {
       var rooms = snapshot.val();
       for (var roomId in rooms) {
+
+        console.log(rooms[roomId].type);
+         if( rooms[roomId].type === 'private')
+         {
+
         
-          this.enterRoom(rooms[roomId].id);
+            this.enterRoom(rooms[roomId].id);
+
+        }
         
       }
     }, /* onError */ function(){}, /* context */ this);
@@ -325,6 +332,8 @@
 
   // Create and automatically enter a new chat room.
   Firechat.prototype.createRoom = function(roomName, roomType, callback) {
+    console.log(roomType);
+    console.log("roomType");
     var self = this,
         newRoomRef = this._roomRef.push();
 
@@ -357,6 +366,7 @@
     var self = this;
     self.getRoom(roomId, function(room) {
       var roomName = room.name;
+      var type = room.type;
 
       if (!roomId || !roomName) return;
 
@@ -372,7 +382,8 @@
         self._userRef.child('rooms').child(roomId).set({
           id: roomId,
           name: roomName,
-          active: true
+          active: true,
+          type: type
         });
 
         // Set presence bit for the room and queue it for removal on disconnect.

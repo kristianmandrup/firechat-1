@@ -756,7 +756,7 @@
     $createRoomButton.bind('click', function(event) {
       var roomName = $('#firechat-input-room-name').val();
       $('#firechat-prompt-create-room').remove();
-      self._chat.createRoom(roomName,"private");
+      self._chat.createRoom(roomName,'private');
       return false;
     });
 
@@ -1210,7 +1210,7 @@
       if (e.which === 13) {
         var name = $prompt.find('[data-input=firechat-room-name]').first().val();
         if (name !== '') {
-          self._chat.createRoom(name, 'public');
+          self._chat.createRoom(name, 'private');
           $prompt.remove();
           return false;
         }
