@@ -14,8 +14,11 @@
     throw new Error("Unable to find chat templates!");
   }
 
+
+
   function FirechatUI(firebaseRef, el, options) {
     var self = this;
+
 
     if (!firebaseRef) {
       throw new Error('FirechatUI: Missing required argument `firebaseRef`');
@@ -714,9 +717,38 @@
 
             $prompt.find('[data-toggle=accept]').click(function() {
               $prompt.remove();
+              var atk = Session.get("atk");
+              var ats = Session.get("ats");
 
               var name = $prompt.find('[data-input=firechat-twitter-name]').first().val();
               console.log('invited',name, roomId);
+              Meteor.call('fireChatCall',name,function(err, response) {
+                console.log('firechatcall');
+
+                if(response)
+                {
+                  var userid = "twitter:".concat(response[0].id);
+                  var name = response[0].name;
+                  //self.setInvitedUser(userid);
+                  self._chat.inviteUser(userid, roomId, name);
+                }
+                       
+                         console.log(response);
+                          });
+            
+              console.log("tokens from session");
+              console.log(atk);
+              console.log(ats);
+
+              var location = root.location.href;
+              var atk = atk;
+              var ats = ats;
+              
+           
+              Meteor.call('invitationForTweet',name,location,ats,atk,function(err, response) {
+                         console.log('invitationForTweet');
+                         console.log(response);
+                          });
               return false;
             });
 
@@ -746,7 +778,12 @@
 
     // Handle click of the create new room prompt-button.
     $createRoomPromptButton.bind('click', function(event) {
-      self.promptCreateRoom();
+      var login = Session.get('Firechat-Login');
+    
+          console.log('login');
+          self.promptCreateRoom();
+          console.log(login)
+    
       return false;
     });
 
@@ -754,7 +791,7 @@
     $createRoomButton.bind('click', function(event) {
       var roomName = $('#firechat-input-room-name').val();
       $('#firechat-prompt-create-room').remove();
-      self._chat.createRoom(roomName);
+      self._chat.createRoom(roomName,"private");
       return false;
     });
 
@@ -1216,6 +1253,33 @@
   };
 
  /**
+   * Launch a prompt to tell the user to login
+   */
+
+  FirechatUI.prototype.promptLoginRequired = function() {
+    var self = this;
+    var template = FirechatDefaultTemplates["templates/prompt-login-required.html"];
+
+    var $prompt = this.prompt('Please Login', template({
+    }));
+
+    $prompt.find('a.close').first().click(function() {
+      $prompt.remove();
+      return false;
+    });
+    $prompt.find('button.close').first().click(function() {
+      $prompt.remove();
+      return false;
+    });
+
+
+
+
+
+  };
+
+
+ /**
    * Launch a prompt to allow the user to Add user handle.
 
    */
@@ -1225,7 +1289,7 @@
        var self = this;
        var template = FirechatDefaultTemplates["templates/prompt-invite-user.html"];
 
-        var $prompt = this.prompt('INvite User', template({
+        var $prompt = this.prompt('Invite User', template({
       maxLengthRoomName: this.maxLengthRoomName,
       isModerator: self._chat.userIsModerator()
     }));

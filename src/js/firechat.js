@@ -252,8 +252,13 @@
     var self = this;
 
     self._firebase.onAuth(function(authData) {
+      
+     // console.log(authData);
+
+      // console.log(authData.twitter.accessToken);
+      // console.log(authData.twitter.accessTokenSecret);
       if (authData) {
-        self._userId = userId.toString();
+         self._userId = userId.toString();
         self._userName = userName.toString();
         self._userRef = self._firebase.child('users').child(self._userId);
         self._loadUserMetadata(function() {
@@ -269,14 +274,33 @@
     });
   };
 
+  Firechat.prototype.setInvitedUser = function(userId)
+  {
+    this._firebase.child('users').child(userId).on('value',function(data){
+
+        var s = data.val();
+        console.log(s);
+        if(s === null)
+        {
+          this._firebase.child('users').update(
+            { userId:{
+              "id": userId
+            }});
+        }
+
+
+      });
+
+  }
+
   // Resumes the previous session by automatically entering rooms.
   Firechat.prototype.resumeSession = function() {
     this._userRef.child('rooms').once('value', function(snapshot) {
       var rooms = snapshot.val();
       for (var roomId in rooms) {
-        if( rooms[roomId].name === 'Private Chat'){
+        
           this.enterRoom(rooms[roomId].id);
-        }
+        
       }
     }, /* onError */ function(){}, /* context */ this);
   };
@@ -516,9 +540,11 @@
   };
 
   // Invite a user to a specific chat room.
-  Firechat.prototype.inviteUser = function(userId, roomId) {
+  Firechat.prototype.inviteUser = function(userId, roomId , username) {
     var self = this,
         sendInvite = function() {
+          self._firebase.child('users').child(userId).update({"id":userId,"name":username});
+
           var inviteRef = self._firebase.child('users').child(userId).child('invites').push();
           inviteRef.set({
             id: inviteRef.key(),
