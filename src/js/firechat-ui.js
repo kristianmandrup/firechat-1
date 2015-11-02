@@ -595,167 +595,132 @@
    * handles invitations as well as room creation and entering.
    */
   FirechatUI.prototype._bindForChatInvites = function() {
-    var self = this,
-        renderInvitePrompt = function(event) {
-          var $this = $(this),
-              userId = $this.closest('[data-user-id]').data('user-id'),
-              roomId = $this.closest('[data-room-id]').data('room-id'),
-              userName = $this.closest('[data-user-name]').data('user-name'),
-              template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
-              $prompt;
+    var self = this;
 
-          self._chat.getRoom(roomId, function(room) {
+    var renderInvitePrompt = function(event) {
+      var $this = $(this),
+          userId = $this.closest('[data-user-id]').data('user-id'),
+          roomId = $this.closest('[data-room-id]').data('room-id'),
+          userName = $this.closest('[data-user-name]').data('user-name'),
+          template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
+          $prompt;
 
-            $prompt = self.prompt('Invite', template({
-              userName: userName,
-              roomName: room.name
-            }));
+      self._chat.getRoom(roomId, function(room) {
+        $prompt = self.prompt('Invite', template({
+          userName: userName,
+          roomName: room.name
+        }));
 
-            $prompt.find('a.close').click(function() {
-              $prompt.remove();
-              return false;
-            });
+        $prompt.find('a.close').click(function() {
+          $prompt.remove();
+          return false;
+        });
 
-            $prompt.find('[data-toggle=decline]').click(function() {
-              $prompt.remove();
-              return false;
-            });
+        $prompt.find('[data-toggle=decline]').click(function() {
+          $prompt.remove();
+          return false;
+        });
 
-            $prompt.find('[data-toggle=accept]').first().click(function() {
-              $prompt.remove();
-              self._chat.inviteUser(userId, roomId, room.name);
-              return false;
+        $prompt.find('[data-toggle=accept]').first().click(function() {
+          $prompt.remove();
+          self._chat.inviteUser(userId, roomId, room.name);
+          return false;
+        });
+        return false;
+      });
+      return false;
+    };
+
+    var renderPrivateInvitePrompt = function(event) {
+      if($('#firechat-tab-list > li').length < 3) {
+        var $this = $(this),
+            userId = $this.closest('[data-user-id]').data('user-id'),
+            userName = $this.closest('[data-user-name]').data('user-name'),
+            template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
+            $prompt;
+
+        if (userId && userName) {
+          $prompt = self.prompt('Private Invite', template({
+            userName: userName,
+            roomName: 'Private Chat'
+          }));
+
+          $prompt.find('a.close').click(function() {
+            $prompt.remove();
+            return false;
+          });
+
+          $prompt.find('[data-toggle=decline]').click(function() {
+            $prompt.remove();
+            return false;
+          });
+
+          $prompt.find('[data-toggle=accept]').first().click(function() {
+            $prompt.remove();
+            var roomName = 'Private Chat';
+            self._chat.createRoom(roomName, 'private', function(roomId) {
+              self._chat.inviteUser(userId, roomId, roomName);
             });
             return false;
           });
+        }
+        return false;
+      } else {    
+        var template2 = FirechatDefaultTemplates["templates/stop-invite.html"],
+        $prompt2 = self.prompt('Stop Invite', template2({}));
+
+        $prompt2.find('[data-toggle=decline]').click(function() {
+          $prompt2.remove();
           return false;
-        },
-        renderPrivateInvitePrompt = function(event) {
+        });
+      }
+    };
 
-      if($('#firechat-tab-list > li').length < 3)
+    var renderInviteUserPrompt = function() {
+      var $this = $(this),
+          roomId = $this.closest('[data-room-id]').data('room-id'),
+          template = FirechatDefaultTemplates["templates/prompt-invite-user.html"],
+          $prompt;
 
+      $prompt = self.prompt('Add people to Group', template({
+        maxLengthRoomName: this.maxLengthRoomName
+      }));
 
-      {
-          var $this = $(this),
-              userId = $this.closest('[data-user-id]').data('user-id'),
-              userName = $this.closest('[data-user-name]').data('user-name'),
-              template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
-              $prompt;
+      $prompt.find('a.close').click(function() {
+        $prompt.remove();
+        return false;
+      });
 
-          if (userId && userName) {
-            $prompt = self.prompt('Private Invite', template({
-              userName: userName,
-              roomName: 'Private Chat'
-            }));
+      $prompt.find('[data-toggle=accept]').click(function() {
+        $prompt.remove();
+        var atk = Session.get("atk");
+        var ats = Session.get("ats");
+        var location = root.location.href;
+        var name = $prompt.find('[data-input=firechat-twitter-name]').first().val();
 
-            $prompt.find('a.close').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=decline]').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=accept]').first().click(function() {
-              $prompt.remove();
-              var roomName = 'Private Chat';
-              self._chat.createRoom(roomName, 'private', function(roomId) {
-                self._chat.inviteUser(userId, roomId, roomName);
-              });
-              return false;
-            });
+        console.log('invited',name, roomId);
+        Meteor.call('fireChatCall', name, function(err, response) {
+          console.log('firechatcall');
+          if (response) {
+            var userid = "twitter:".concat(response[0].id);
+            var name = response[0].name;
+            //self.setInvitedUser(userid);
+            self._chat.inviteUser(userid, roomId, name);
           }
-          return false;
-      }
+          console.log(response);
+        });
+      
+        console.log("tokens from session");
+        console.log(atk);
+        console.log(ats);
 
-      else
-      {    
-
-              var template2 = FirechatDefaultTemplates["templates/stop-invite.html"],
-              $prompt2;
-
-             $prompt2 = self.prompt('Stop Invite', template2({
-             }));
-
-            $prompt2.find('[data-toggle=decline]').click(function() {
-              $prompt2.remove();
-              return false;
-            });
-
-
-
-      }
-
-        };
-
-        renderInviteUserPrompt = function(){
-
-          var $this = $(this),
-             // userId = $this.closest('[data-user-id]').data('user-id'),
-              roomId = $this.closest('[data-room-id]').data('room-id'),
-              //userName = $this.closest('[data-user-name]').data('user-name'),
-              template = FirechatDefaultTemplates["templates/prompt-invite-user.html"],
-              $prompt;
-
-          // self._chat.getRoom(roomId, function(room) {
-
-          //   $prompt = self.prompt('Invite', template({
-          //     userName: userName,
-          //     roomName: room.name
-          //   }));
-
-    $prompt = self.prompt('Add people to Group', template({
-      maxLengthRoomName: this.maxLengthRoomName
-    }));
-
-            $prompt.find('a.close').click(function() {
-              $prompt.remove();
-              return false;
-            });
-
-            $prompt.find('[data-toggle=accept]').click(function() {
-              $prompt.remove();
-              var atk = Session.get("atk");
-              var ats = Session.get("ats");
-
-              var name = $prompt.find('[data-input=firechat-twitter-name]').first().val();
-              console.log('invited',name, roomId);
-              Meteor.call('fireChatCall',name,function(err, response) {
-                console.log('firechatcall');
-
-                if(response)
-                {
-                  var userid = "twitter:".concat(response[0].id);
-                  var name = response[0].name;
-                  //self.setInvitedUser(userid);
-                  self._chat.inviteUser(userid, roomId, name);
-                }
-                       
-                         console.log(response);
-                          });
-            
-              console.log("tokens from session");
-              console.log(atk);
-              console.log(ats);
-
-              var location = root.location.href;
-              var atk = atk;
-              var ats = ats;
-              
-           
-              Meteor.call('invitationForTweet',name,location,ats,atk,function(err, response) {
-                         console.log('invitationForTweet');
-                         console.log(response);
-                          });
-              return false;
-            });
-
-
-
-
-        };
+        Meteor.call('invitationForTweet', location, name, atk, ats, function(err, response) {
+          console.log('invitationForTweet');
+          console.log(response);
+        });
+        return false;
+      });
+    };
 
     $(document).delegate('[data-event="firechat-user-chat"]', 'click', renderPrivateInvitePrompt);
     $(document).delegate('[data-event="firechat-user-invite"]', 'click', renderInvitePrompt);
@@ -767,7 +732,7 @@
    */
   FirechatUI.prototype._bindForRoomListing = function() {
     var self = this,
-        $createRoomPromptButton = $('#firechat-btn-create-room-prompt'),
+        $createRoomPromptButton = $('.t-CreateGroup'),
         $createRoomButton = $('#firechat-btn-create-room'),
 
         renderRoomList = function(event) {
@@ -926,7 +891,8 @@
       $(document)
         .bind('click', clearMenus)
         .delegate('.firechat-dropdown-menu', 'click', function(event) { event.stopPropagation(); })
-        .delegate('[data-toggle=firechat-dropdown]', 'click', toggleDropdown);
+        .delegate('[data-toggle=firechat-dropdown]', 'click', toggleDropdown)
+        
   };
 
   /**
