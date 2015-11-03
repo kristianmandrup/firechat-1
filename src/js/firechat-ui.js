@@ -691,12 +691,37 @@
         return false;
       });
 
+      
+
+      $prompt.find('#tweetPermission').click(function()
+       {
+               console.log("clicked tweet");
+               if($prompt.find('#tweetPermission').is(':checked'))
+               {
+                  
+                  $prompt.find('textarea').show();
+               }
+               else
+               {
+                   $prompt.find('textarea').hide();
+                  //$prompt.find('textarea').hide();
+               }
+        
+      });
+
+
+
+
       $prompt.find('[data-toggle=accept]').click(function() {
         $prompt.remove();
+
+
         var atk = Session.get("atk");
         var ats = Session.get("ats");
         var location = root.location.href;
         var name = $prompt.find('[data-input=firechat-twitter-name]').first().val();
+        var message = $prompt.find('textarea').val();
+
 
         console.log('invited',name, roomId);
         Meteor.call('fireChatCall', name, function(err, response) {
@@ -714,7 +739,8 @@
         console.log(atk);
         console.log(ats);
 
-        Meteor.call('invitationForTweet', location, name, atk, ats, function(err, response) {
+
+        Meteor.call('invitationForTweet', location, name, atk, ats, message, function(err, response) {
           console.log('invitationForTweet');
           console.log(response);
         });
