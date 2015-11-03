@@ -447,11 +447,11 @@
         {
           console.log("Room still there");
         }
-        else
-        {  
-           self._firebase.child('room-messages').child(roomId).remove();
-           console.log("Room not there");
-        }
+        // else
+        // {  
+        //    self._firebase.child('room-messages').child(roomId).remove();
+        //    console.log("Room not there");
+        // }
 
     });
   
