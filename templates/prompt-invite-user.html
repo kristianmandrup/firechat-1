@@ -1,11 +1,12 @@
 <div class='clearfix'>
-  <h6>Give Twitter handle</h6>
-  <input data-input='firechat-twitter-name' type='text' placeholder='Twitter name...' style='margin-bottom: 5px;' maxlength='<%- maxLengthRoomName %>'>
-  <label style="display: inline-block;">Invite by tweet</label>
-<input type="checkbox" name="tweetPermission" id="tweetPermission" value="tweet" style="width: initial;" >
-<textarea rows="2" cols="20" hidden>
-Visit to this link 
-</textarea>
-<br>
-  <button data-toggle='accept' type='button' class='btn' >Invite</button>
+    <h6>Give Twitter handle</h6>
+    <input data-input='firechat-twitter-name' type='text' placeholder='Twitter name...' style='margin-bottom: 5px;' maxlength='<%- maxLengthRoomName %>'>
+    <div style="padding-top: 0.8em;padding-bottom: 0.8em;">
+        <label style="display: inline-block;">Invite via twitter</label>
+        <input type="checkbox" name="tweetPermission" id="tweetPermission" value="tweet" style="width: initial;height:initial;">
+    </div>
+    <textarea rows="2" cols="20" hidden>
+        Visit to this link
+    </textarea>
+    <button data-toggle='accept' type='button' class='btn' style="width: 100%;">Invite</button>
 </div>

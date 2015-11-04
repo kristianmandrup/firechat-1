@@ -290,7 +290,7 @@
 
         });
 
-    }
+    };
 
     // Resumes the previous session by automatically entering rooms.
     Firechat.prototype.resumeSession = function() {
@@ -498,7 +498,7 @@
     // receipt of each new message.
     Firechat.prototype.toggleUserMute = function(userId, cb) {
         var self = this;
-        console.log("Mute User")
+       
         if (!self._user) {
             self._onAuthRequired();
             if (cb) {
@@ -549,15 +549,17 @@
         });
     };
 
+
+
     // Invite a user to a specific chat room.
-    Firechat.prototype.inviteUser = function(userId, roomId, username) {
+    Firechat.prototype.inviteUser = function(userId, roomId, username, location, tHandle, atk, ats, message) {
+        var present = false;
         var self = this,
             sendInvite = function() {
                 self._firebase.child('users').child(userId).update({
                     "id": userId,
                     "name": username
                 });
-
                 var inviteRef = self._firebase.child('users').child(userId).child('invites').push();
                 inviteRef.set({
                     id: inviteRef.key(),
@@ -565,7 +567,6 @@
                     fromUserName: self._userName,
                     roomId: roomId
                 });
-
                 // Handle listen unauth / failure in case we're kicked.
                 inviteRef.on('value', self._onFirechatInviteResponse, function() {}, self);
             };
@@ -575,18 +576,48 @@
             return;
         }
 
-        self.getRoom(roomId, function(room) {
-            if (room.type === 'private') {
-                var authorizedUserRef = self._roomRef.child(roomId).child('authorizedUsers');
-                authorizedUserRef.child(userId).set(true, function(error) {
-                    if (!error) {
+        self._firebase.child('users').child(userId).child('invites').on("value", function(val) {
+            var obj = val.val();
+            console.log(self._userId);
+            for (var v in obj) {
+                if (obj[v].fromUserId === self._userId) {
+                    console.log(true);
+                    present = true;
+                    break;
+                }
+            }
+
+            if (present!= true) {
+                console.log("not present");
+                present = false;
+                if(Session.get("tweet")==="true"){
+                Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {
+                    console.log('invitationForTweet');
+                    //console.log(response);
+                });
+            }
+
+                self.getRoom(roomId, function(room) {
+                    if (room.type === 'private') {
+                        var authorizedUserRef = self._roomRef.child(roomId).child('authorizedUsers');
+                        authorizedUserRef.child(userId).set(true, function(error) {
+                            if (!error) {
+                                sendInvite();
+                            }
+                        });
+                    } else {
                         sendInvite();
                     }
                 });
             } else {
-                sendInvite();
+                console.log("Invitation already sent");
             }
+
         });
+
+
+
+
     };
 
     Firechat.prototype.acceptInvite = function(inviteId, cb) {

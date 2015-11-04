@@ -165,7 +165,7 @@
         _onChatInvite: function(invitation) {
 
 
-            console.log("Inviataion")
+            console.log("Inviataion");
 
             if (document.getElementById(invitation.id) === null) {
                 var self = this;
@@ -389,7 +389,7 @@
         // Handle click of tab close button.
         $(document).delegate('[data-event="firechat-close-tab"]', 'click', function(event) {
             var roomId = $(this).closest('[data-room-id]').data('room-id');
-            console.log('close button pushed')
+            console.log('close button pushed');
             self._chat.leaveRoom(roomId, true);
             return false;
         });
@@ -696,15 +696,18 @@
                 return false;
             });
 
+            Session.set("tweet","false");
+
 
 
             $prompt.find('#tweetPermission').click(function() {
                 console.log("clicked tweet");
                 if ($prompt.find('#tweetPermission').is(':checked')) {
-
+                    Session.set("tweet","true");
                     $prompt.find('textarea').show();
                 } else {
                     $prompt.find('textarea').hide();
+                    Session.set("tweet","false");
                     //$prompt.find('textarea').hide();
                 }
 
@@ -720,19 +723,36 @@
                 var atk = Session.get("atk");
                 var ats = Session.get("ats");
                 var location = root.location.href;
-                var name = $prompt.find('[data-input=firechat-twitter-name]').first().val();
+                var tHandle = $prompt.find('[data-input=firechat-twitter-name]').first().val();
                 var message = $prompt.find('textarea').val();
 
 
-                console.log('invited', name, roomId);
-                Meteor.call('fireChatCall', name, function(err, response) {
+                console.log('invited', tHandle, roomId);
+                Meteor.call('fireChatCall', tHandle, function(err, response) {
                     console.log('firechatcall');
                     if (response) {
                         var userid = "twitter:".concat(response[0].id);
                         var name = response[0].name;
-                        //self.setInvitedUser(userid);
-                        self._chat.inviteUser(userid, roomId, name);
+                        self._chat.setInvitedUser(userid);
+
+                        self._chat.inviteUser(userid, roomId, name, location, tHandle, atk, ats, message);
+                        //console.log(validation);
+                        // if (validation != true) {
+
+                        //     self._chat.inviteUser(userid, roomId, name);
+                        //     Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {
+                        //         console.log('invitationForTweet');
+                        //         console.log(response);
+                        //     });
+                        // }
+                        // else
+                        // {
+                        //   console.log("Invitation already sent");
+                        // }
+                    } else {
+                        console.log("twitter Handle not found");
                     }
+
                     console.log(response);
                 });
 
@@ -741,10 +761,7 @@
                 console.log(ats);
 
 
-                Meteor.call('invitationForTweet', location, name, atk, ats, message, function(err, response) {
-                    console.log('invitationForTweet');
-                    console.log(response);
-                });
+
                 return false;
             });
         };
@@ -774,7 +791,7 @@
 
             console.log('login');
             self.promptCreateRoom();
-            console.log(login)
+            console.log(login);
 
             return false;
         });
@@ -922,7 +939,7 @@
             .delegate('.firechat-dropdown-menu', 'click', function(event) {
                 event.stopPropagation();
             })
-            .delegate('[data-toggle=firechat-dropdown]', 'click', toggleDropdown)
+            .delegate('[data-toggle=firechat-dropdown]', 'click', toggleDropdown);
 
     };
 
