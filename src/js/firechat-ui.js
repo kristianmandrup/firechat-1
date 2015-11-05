@@ -164,9 +164,6 @@
         // Events related to chat invitations.
         _onChatInvite: function(invitation) {
 
-
-            console.log("Inviataion");
-
             if (document.getElementById(invitation.id) === null) {
                 var self = this;
                 var template = FirechatDefaultTemplates["templates/prompt-invitation.html"];
@@ -205,7 +202,6 @@
                 $prompt = this.prompt('Accepted', template(invitation));
                 this._chat.getRoom(invitation.roomId, function(room) {
                     self.attachTab(invitation.roomId, room.name);
-                    console.log('###testing##' + room);
                 });
             } else {
                 $prompt = this.prompt('Declined', template(invitation));
@@ -389,7 +385,6 @@
         // Handle click of tab close button.
         $(document).delegate('[data-event="firechat-close-tab"]', 'click', function(event) {
             var roomId = $(this).closest('[data-room-id]').data('room-id');
-            console.log('close button pushed');
             self._chat.leaveRoom(roomId, true);
             return false;
         });
@@ -701,7 +696,6 @@
 
 
             $prompt.find('#tweetPermission').click(function() {
-                console.log("clicked tweet");
                 if ($prompt.find('#tweetPermission').is(':checked')) {
                     Session.set("tweet","true");
                     $prompt.find('textarea').show();
@@ -725,11 +719,7 @@
                 var location = root.location.href;
                 var tHandle = $prompt.find('[data-input=firechat-twitter-name]').first().val();
                 var message = $prompt.find('textarea').val();
-
-
-                console.log('invited', tHandle, roomId);
                 Meteor.call('fireChatCall', tHandle, function(err, response) {
-                    console.log('firechatcall');
                     if (response) {
                         var userid = "twitter:".concat(response[0].id);
                         var name = response[0].name;
@@ -755,13 +745,6 @@
 
                     console.log(response);
                 });
-
-                console.log("tokens from session");
-                console.log(atk);
-                console.log(ats);
-
-
-
                 return false;
             });
         };
@@ -788,11 +771,7 @@
         // Handle click of the create new room prompt-button.
         $createRoomPromptButton.bind('click', function(event) {
             var login = Session.get('Firechat-Login');
-
-            console.log('login');
             self.promptCreateRoom();
-            console.log(login);
-
             return false;
         });
 
@@ -1009,9 +988,6 @@
             this.focusTab(roomId);
             return;
         }
-        console.log("testing 2###");
-
-
         var room = {
             id: roomId,
             name: roomName

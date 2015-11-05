@@ -330,8 +330,6 @@
 
     // Create and automatically enter a new chat room.
     Firechat.prototype.createRoom = function(roomName, roomType, callback) {
-        console.log(roomType);
-        console.log("roomType");
         var self = this,
             newRoomRef = this._roomRef.push();
 
@@ -422,12 +420,6 @@
 
         // Remove listener for new messages to this room.
         self._messageRef.child(roomId).off();
-        console.log("LEAVE Room");
-        console.log(closebutton);
-        console.log(roomId);
-
-
-
         if (closebutton) {
 
             if (self._user) {
@@ -440,9 +432,6 @@
 
 
             self._firebase.child('room-users').child(roomId).on('value', function(data) {
-
-                console.log(data.val());
-
                 if (data.val()) {
                     console.log("Room still there");
                 }
@@ -588,7 +577,6 @@
             }
 
             if (present!= true) {
-                console.log("not present");
                 present = false;
                 if(Session.get("tweet")==="true"){
                 Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {
