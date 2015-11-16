@@ -615,6 +615,21 @@
                 return false;
             });
 
+            $prompt.find('a.close').first().click(function() {
+                $prompt.remove();
+                return false;
+            });
+            $prompt.find('li').click(function() {
+                
+                var id = $(this).closest('[data-id]').data('id');
+                console.log(id);
+                self._chat.removeMutedUsers(id);
+                $prompt.remove();
+                return false;
+            });
+
+            
+
         });
     };
 

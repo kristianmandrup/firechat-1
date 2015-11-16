@@ -250,7 +250,7 @@
             var list = "";
 
             for (var v in obj) {
-                var name = "<li>"+obj[v].username;
+                var name = "<li data-id="+v+">"+obj[v].username+"<a>remove</a>";
                 console.log("muting");
                 list = list + name + "</li>";
             }
@@ -522,6 +522,12 @@
         self._userRef.child('muted').child(userId).update({
             username: name
         });
+    };
+
+    Firechat.prototype.removeMutedUsers = function(id)
+    {
+        var self = this;
+        self._userRef.child('muted').child(id).remove();
     };
 
 
