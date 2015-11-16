@@ -30,6 +30,7 @@
         this._userId = null;
         this._userName = null;
         this._isModerator = false;
+        
 
         // A unique id generated for each session.
         this._sessionId = null;
@@ -241,7 +242,22 @@
 
             invite.id = invite.id || snapshot.key();
             this._invokeEventCallbacks('room-invite-response', invite);
-        }
+        },
+        _getMutedUsers : function(id) {
+        var self = this;
+        self._firebase.child('users').child(id).child('muted').on("value", function(val) {
+            var obj = val.val();
+            var list = "";
+
+            for (var v in obj) {
+                var name = "<li>"+obj[v].username;
+                console.log("muting");
+                list = list + name + "</li>";
+            }
+            root._mutedUsers = list;
+        });
+
+    }
     };
 
     // Firechat External Methods
@@ -259,6 +275,8 @@
             // console.log(authData.twitter.accessTokenSecret);
             if (authData) {
                 self._userId = userId.toString();
+                root._userId = userId.toString();
+
                 self._userName = userName.toString();
                 self._userRef = self._firebase.child('users').child(self._userId);
                 self._loadUserMetadata(function() {
@@ -267,6 +285,7 @@
                         self._setupDataEvents();
                     }, 0);
                 });
+                self._getMutedUsers(self._userId);
             } else {
                 self.warn('Firechat requires an authenticated Firebase reference. Pass an authenticated reference before loading.');
             }
@@ -485,9 +504,9 @@
     // Mute or unmute a given user by id. This list will be stored internally and
     // all messages from the muted clients will be filtered client-side after
     // receipt of each new message.
-    Firechat.prototype.toggleUserMute = function(userId, cb) {
+    Firechat.prototype.toggleUserMute = function(userId, name, cb) {
         var self = this;
-       
+
         if (!self._user) {
             self._onAuthRequired();
             if (cb) {
@@ -496,10 +515,15 @@
             return;
         }
 
-        self._userRef.child('muted').child(userId).transaction(function(isMuted) {
+
+        self._userRef.child('muted').child(userId).child(userId).transaction(function(isMuted) {
             return (isMuted) ? null : true;
         }, cb);
+        self._userRef.child('muted').child(userId).update({
+            username: name
+        });
     };
+
 
     // Send a moderator notification to a specific user.
     Firechat.prototype.sendSuperuserNotification = function(userId, notificationType, data, cb) {
@@ -576,14 +600,14 @@
                 }
             }
 
-            if (present!= true) {
+            if (present != true) {
                 present = false;
-                if(Session.get("tweet")==="true"){
-                Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {
-                    console.log('invitationForTweet');
-                    //console.log(response);
-                });
-            }
+                if (Session.get("tweet") === "true") {
+                    Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {
+                        console.log('invitationForTweet');
+                        //console.log(response);
+                    });
+                }
 
                 self.getRoom(roomId, function(room) {
                     if (room.type === 'private') {

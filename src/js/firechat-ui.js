@@ -35,6 +35,7 @@
         this._user = null;
         this._chat = new Firechat(firebaseRef, options);
 
+
         // A list of rooms to enter once we've made room for them (once we've hit the max room limit).
         this._roomQueue = [];
 
@@ -71,6 +72,7 @@
 
         // Setup bindings to internal methods
         this._bindDataEvents();
+        
     }
 
     // Run FirechatUI in *noConflict* mode, returning the `FirechatUI` variable to
@@ -458,6 +460,13 @@
                 self.sortListLexicographically('#' + targetId);
             });
         });
+
+
+
+
+
+
+
     };
 
     /**
@@ -580,13 +589,32 @@
                 });
 
                 $prompt.find('[data-toggle=accept]').first().click(function() {
-                    self._chat.toggleUserMute(userId);
+                    self._chat.toggleUserMute(userId, userName);
                     $prompt.remove();
                     return false;
                 });
             } else {
-                self._chat.toggleUserMute(userId);
+                self._chat.toggleUserMute(userId, userName);
             }
+        });
+
+
+
+
+        $(document).delegate('#mutedUsers', 'click', function(event) {
+            console.log("self._mutedUser");
+            console.log(this._mutedUsers);
+            console.log(window._mutedUsers);
+            template = FirechatDefaultTemplates["templates/muted-Users.html"];
+            var list = window._mutedUsers;
+            var $prompt = self.prompt('Muted Users', template({
+                list: list
+            }));
+            $prompt.find('a.close').first().click(function() {
+                $prompt.remove();
+                return false;
+            });
+
         });
     };
 
@@ -691,17 +719,17 @@
                 return false;
             });
 
-            Session.set("tweet","false");
+            Session.set("tweet", "false");
 
 
 
             $prompt.find('#tweetPermission').click(function() {
                 if ($prompt.find('#tweetPermission').is(':checked')) {
-                    Session.set("tweet","true");
+                    Session.set("tweet", "true");
                     $prompt.find('textarea').show();
                 } else {
                     $prompt.find('textarea').hide();
-                    Session.set("tweet","false");
+                    Session.set("tweet", "false");
                     //$prompt.find('textarea').hide();
                 }
 
