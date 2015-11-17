@@ -612,7 +612,11 @@
             console.log(this._mutedUsers);
             console.log(window._mutedUsers);
             template = FirechatDefaultTemplates["templates/muted-Users.html"];
+
             var list = window._mutedUsers;
+            if (list === "") {
+                list = "No muted users";
+            }
             var $prompt = self.prompt('Muted Users', template({
                 list: list
             }));

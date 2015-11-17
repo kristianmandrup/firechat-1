@@ -250,8 +250,8 @@
             var list = "";
 
             for (var v in obj) {
-                var name = "<li data-id="+v+">"+obj[v].username+"<a>remove</a>";
-                console.log("muting");
+                var name = "<li data-id="+v+">"+obj[v].username+" <a> Unmute</a>";
+                
                 list = list + name + "</li>";
             }
             root._mutedUsers = list;
