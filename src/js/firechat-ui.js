@@ -72,7 +72,7 @@
 
         // Setup bindings to internal methods
         this._bindDataEvents();
-        
+
     }
 
     // Run FirechatUI in *noConflict* mode, returning the `FirechatUI` variable to
@@ -144,6 +144,12 @@
 
         _onEnterRoom: function(room) {
             this.attachTab(room.id, room.name);
+            this._chat.getRoom(room.id, function(room) {
+                if (room.type === 'public') {
+                    $('.close').remove();
+                    $('.user-chat').remove();
+                }
+            });
         },
         _onLeaveRoom: function(roomId) {
             this.removeTab(roomId);
@@ -620,7 +626,7 @@
                 return false;
             });
             $prompt.find('li').click(function() {
-                
+
                 var id = $(this).closest('[data-id]').data('id');
                 console.log(id);
                 self._chat.removeMutedUsers(id);
@@ -628,7 +634,7 @@
                 return false;
             });
 
-            
+
 
         });
     };
@@ -1060,8 +1066,8 @@
         var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
         var $tab = $(tabListTemplate(room));
         this.$tabList.append($tab);
-        this.$tabList.find('a').first().children().removeClass('close');
-        this.$tabList.find('a').first().children().hide();
+        //this.$tabList.find('a').first().children().removeClass('close');
+        //this.$tabList.find('a').first().children().hide();
 
         // Attach on-shown event to move tab to front and scroll to bottom.
         $tab.bind('shown', function(event) {
