@@ -18,6 +18,8 @@
 
     function FirechatUI(firebaseRef, el, options) {
         var self = this;
+        console.log("ELLL");
+        console.log(el);
 
 
         if (!firebaseRef) {

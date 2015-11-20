@@ -269,10 +269,6 @@
 
         self._firebase.onAuth(function(authData) {
 
-            // console.log(authData);
-
-            // console.log(authData.twitter.accessToken);
-            // console.log(authData.twitter.accessTokenSecret);
             if (authData) {
                 self._userId = userId.toString();
                 root._userId = userId.toString();
@@ -297,7 +293,6 @@
         this._firebase.child('users').child(userId).on('value', function(data) {
 
             var s = data.val();
-            console.log(s);
             if (s === null) {
                 this._firebase.child('users').update({
                     userId: {
@@ -316,13 +311,8 @@
         this._userRef.child('rooms').once('value', function(snapshot) {
             var rooms = snapshot.val();
             for (var roomId in rooms) {
-
-                console.log(rooms[roomId].type);
                 if (rooms[roomId].type === 'private') {
-
-
                     this.enterRoom(rooms[roomId].id);
-
                 }
 
             }
@@ -547,7 +537,6 @@
     // Warn a user for violating the terms of service or being abusive.
     Firechat.prototype.warnUser = function(userId) {
         var self = this;
-
         self.sendSuperuserNotification(userId, 'warning');
     };
 
@@ -597,7 +586,6 @@
 
         self._firebase.child('users').child(userId).child('invites').on("value", function(val) {
             var obj = val.val();
-            console.log(self._userId);
             for (var v in obj) {
                 if (obj[v].fromUserId === self._userId) {
                     console.log(true);
