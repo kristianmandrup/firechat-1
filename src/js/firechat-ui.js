@@ -18,8 +18,6 @@
 
     function FirechatUI(firebaseRef, el, options) {
         var self = this;
-        console.log("ELLL");
-        console.log(el);
 
 
         if (!firebaseRef) {
@@ -145,12 +143,10 @@
         },
 
         _onEnterRoom: function(room) {
-            this.attachTab(room.id, room.name);
+            var self = this;
+            
             this._chat.getRoom(room.id, function(room) {
-                if (room.type === 'public') {
-                    $('.close').remove();
-                    $('.user-chat').remove();
-                }
+                self.attachTab(room.id, room.name, room.type);
             });
         },
         _onLeaveRoom: function(roomId) {
@@ -610,9 +606,6 @@
 
 
         $(document).delegate('#mutedUsers', 'click', function(event) {
-            console.log("self._mutedUser");
-            console.log(this._mutedUsers);
-            console.log(window._mutedUsers);
             template = FirechatDefaultTemplates["templates/muted-Users.html"];
 
             var list = window._mutedUsers;
@@ -634,7 +627,6 @@
             $prompt.find('li').click(function() {
 
                 var id = $(this).closest('[data-id]').data('id');
-                console.log(id);
                 self._chat.removeMutedUsers(id);
                 $prompt.remove();
                 return false;
@@ -1035,7 +1027,7 @@
      * @param    {string}    roomId
      * @param    {string}    roomName
      */
-    FirechatUI.prototype.attachTab = function(roomId, roomName) {
+    FirechatUI.prototype.attachTab = function(roomId, roomName ,roomType) {
         var self = this;
 
         // If this tab already exists, give it focus.
@@ -1069,7 +1061,16 @@
         });
 
         // Populate and render the tab menu template.
+        if(roomType != "public")
+        {
         var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
+        }
+        else
+        {
+            var tabListTemplate = FirechatDefaultTemplates["templates/public-tab-menu.html"];
+        }
+
+
         var $tab = $(tabListTemplate(room));
         this.$tabList.append($tab);
         //this.$tabList.find('a').first().children().removeClass('close');
