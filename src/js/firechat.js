@@ -289,6 +289,7 @@
         });
     };
 
+
     Firechat.prototype.setInvitedUser = function(userId) {
         this._firebase.child('users').child(userId).on('value', function(data) {
 
@@ -306,6 +307,7 @@
 
     };
 
+
     // Resumes the previous session by automatically entering rooms.
     Firechat.prototype.resumeSession = function() {
         this._userRef.child('rooms').once('value', function(snapshot) {
@@ -318,6 +320,7 @@
             }
         }, /* onError */ function() {}, /* context */ this);
     };
+
 
     Firechat.prototype.removeSessions = function(callback) {
         this._userRef.child('rooms').once('value', function(snapshot) {
@@ -332,16 +335,17 @@
         callback();
     };
 
+
     // Callback registration. Supports each of the following events:
     Firechat.prototype.on = function(eventType, cb) {
         this._addEventCallback(eventType, cb);
     };
 
+
     // Create and automatically enter a new chat room.
     Firechat.prototype.createRoom = function(roomName, roomType, callback) {
         var self = this,
             newRoomRef = this._roomRef.push();
-
         var newRoom = {
             id: newRoomRef.key(),
             name: roomName,
@@ -349,12 +353,10 @@
             createdByUserId: this._userId,
             createdAt: Firebase.ServerValue.TIMESTAMP
         };
-
         if (roomType === 'private') {
             newRoom.authorizedUsers = {};
             newRoom.authorizedUsers[this._userId] = true;
         }
-
         newRoomRef.set(newRoom, function(error) {
             if (!error) {
                 self.enterRoom(newRoomRef.key());
@@ -365,9 +367,9 @@
         });
     };
 
+
     // Enter a chat room.
     Firechat.prototype.enterRoom = function(roomId) {
-
         var self = this;
         self.getRoom(roomId, function(room) {
             var roomName = room.name;
@@ -594,7 +596,7 @@
                 }
             }
 
-            if (present != true) {
+            if (present !== true) {
                 present = false;
                 if (Session.get("tweet") === "true") {
                     Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {

@@ -1059,15 +1059,16 @@
                 return false;
             }
         });
+        var tabListTemplate;
 
         // Populate and render the tab menu template.
         if(roomType != "public")
         {
-        var tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
+         tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
         }
         else
         {
-            var tabListTemplate = FirechatDefaultTemplates["templates/public-tab-menu.html"];
+             tabListTemplate = FirechatDefaultTemplates["templates/public-tab-menu.html"];
         }
 
 
@@ -1096,6 +1097,7 @@
         });
 
         // Automatically select the new tab.
+        self._chat.resumeSession();
         this.focusTab(roomId);
     };
 
