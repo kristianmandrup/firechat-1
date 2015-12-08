@@ -304,12 +304,13 @@
 
 
         });
-
     };
 
 
     // Resumes the previous session by automatically entering rooms.
-    Firechat.prototype.resumeSession = function() {
+    Firechat.prototype.resumeSession = function(chatroom) {
+        
+
         this._userRef.child('rooms').once('value', function(snapshot) {
             var rooms = snapshot.val();
             for (var roomId in rooms) {
@@ -318,6 +319,7 @@
                 }
 
             }
+            
         }, /* onError */ function() {}, /* context */ this);
     };
 
@@ -422,6 +424,7 @@
                 }, /* onCancel */ function() {}, /* context */ self);
             }, /* onFailure */ function() {}, self);
         });
+        
     };
 
     // Leave a chat room.

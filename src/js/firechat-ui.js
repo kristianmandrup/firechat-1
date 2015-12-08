@@ -246,7 +246,7 @@
      * This method assumes that the underlying Firebase reference has
      * already been authenticated.
      */
-    FirechatUI.prototype.setUser = function(userId, userName) {
+    FirechatUI.prototype.setUser = function(userId, userName, chatroom) {
         var self = this;
 
         // Initialize data events
@@ -257,7 +257,9 @@
                 self._bindSuperuserUIEvents();
             }
 
+            self._chat.enterRoom(chatroom);
             self._chat.resumeSession();
+            
         });
     };
 
@@ -1097,7 +1099,7 @@
         });
 
         // Automatically select the new tab.
-        self._chat.resumeSession();
+        //self._chat.resumeSession();
         this.focusTab(roomId);
     };
 
