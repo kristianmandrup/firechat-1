@@ -5,11 +5,19 @@
 Firechat is a chat widget powered by [Firebase](https://www.firebase.com/?utm_source=firechat).
 It is intended to serve as a concise, documented foundation for chat products built on Firebase.
 
-It works out of the box, and can be extended.
-
 ## Refactor
 
-This version of Firechat has undegone major refactoring/cleanup in order to make it more declarative. The code of the massive `.js` files has now been divided into logical units for a better overview. ES6 syntax is used, includding: arrow functions, classes and modules.
+This version of Firechat has undegone major refactoring/cleanup in order to make it more declarative and remove dependencies and loads of ugly hard-coded duplication. It is a WIP.
+
+The code of the orginal "massive/bloated" `.js` files have been divided into logical units for a better undrstanding/overview. ES6 syntax is now used, includding: arrow functions, classes (and soon modules ...).
+
+This version is NOT intended to work!
+
+We have decoupled this chat lib from any reference to View specific libraries or render targets such as jQuery and the browser DOM. By doing this, it should be much easier to understand the basic idea/functionality of the code and port it for whatever platform/environment that suits you.
+
+We plan to pluck pieces of this infrastructure for React Native or a similar platform. You can do the same!
+
+Good luck :)
 
 ### firechat.js
 
