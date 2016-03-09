@@ -411,49 +411,54 @@ Prompts to add people to group and also asks for and handles Twitter tweet permi
 
 ## firechat-ui.js
 
-    _bindUIEvents() {
-        // Chat-specific custom interactions and functionality.
-        this.binder.heightChange();
-        this.binder.tabControls();
+Creates UI bindings for:
+- UI events
+- incoming data events
 
-        this.rooms.roomList();
-        this.room.roomListing();
+Note: Also displays the chat component via `_renderLayout()`
 
-        this.user.userRoomList();
-        this.user.userSearch();
-        this.user.userMuting();
-        this.invite.chatInvites();
+### UI events
 
-        // Generic, non-chat-specific interactive elements.
-        this._setupTabs();
-        this._setupDropdowns();
-        this._bindTextInputFieldLimits();
-    }
+```js
+_bindUIEvents() {
+    // Chat-specific custom interactions and functionality.
+    this.binder.heightChange();
+    this.binder.tabControls();
 
-`_bindDataEvents`
+    this.rooms.roomList();
+    this.room.roomListing();
 
-`user-update`: `_onUpdateUser`
+    this.user.userRoomList();
+    this.user.userSearch();
+    this.user.userMuting();
+    this.invite.chatInvites();
+
+    // Generic, non-chat-specific interactive elements.
+    this._setupTabs();
+    this._setupDropdowns();
+    this._bindTextInputFieldLimits();
+}
+```
+
+### Data events
+
+`_bindDataEvents()`
+
+- `user-update`: `_onUpdateUser`
 
 Bind events for new messages, enter / leaving rooms, and user metadata.
 
-`room-enter`: `_onEnterRoom`
-`room-exit`: `_onLeaveRoom`
-`message-add`: `_onNewMessage`
-`message-remove`, `_onRemoveMessage`
+- `room-enter`: `_onEnterRoom`
+- `room-exit`: `_onLeaveRoom`
+- `message-add`: `_onNewMessage`
+- `message-remove`, `_onRemoveMessage`
 
 Bind events related to chat invitations.
-
-`room-invite`: `_onChatInvite`
-`room-invite-response`: `_onChatInviteResponse`
+- `room-invite`: `_onChatInvite`
+- `room-invite-response`: `_onChatInviteResponse`
 
 Binds events related to admin or moderator notifications.
-
-`notification`: `_onNotification`
-
-### Display the chat
-
-`_renderLayout()`
-
+- `notification`: `_onNotification`
 
 ## Live Demo
 
