@@ -92,74 +92,80 @@ class UserUi {
      * Binds user mute toggles and removes all messages for a given user upon mute.
      */
     userMuting() {
-        var self = this;
-        $(document).delegate('[data-event="firechat-user-mute-toggle"]', 'click', function(event) {
-            var $this = $(this),
-                userId = $this.closest('[data-user-id]').data('user-id'),
-                userName = $this.closest('[data-user-name]').data('user-name'),
-                isMuted = $this.hasClass('red'),
-                template = FirechatDefaultTemplates["templates/prompt-user-mute.html"];
-
-            event.preventDefault();
+        onClick('firechat-user-mute-toggle', (event) => {
+            var userId = data('user-id'),
+                userName = data('user-name'),
+                isMuted = this.is('muted');
 
             // Require user confirmation for muting.
             if (!isMuted) {
-                var $prompt = self.prompt('Mute User?', template({
+                var $prompt = this.prompt('Mute User?', {
                     userName: userName
                 }));
 
-                $prompt.find('a.close').first().click(function() {
+                onClose($prompt, () => {
                     $prompt.remove();
-                    return false;
                 });
 
-                $prompt.find('[data-toggle=decline]').first().click(function() {
+                onClick('decline', () => {
                     $prompt.remove();
-                    return false;
                 });
 
-                $prompt.find('[data-toggle=accept]').first().click(function() {
+                onClick('accept', () => {
                     self._chat.toggleUserMute(userId, userName);
                     $prompt.remove();
-                    return false;
                 });
             } else {
-                self._chat.toggleUserMute(userId, userName);
+                this._chat.toggleUserMute(userId, userName);
             }
         });
 
 
 
 
-        $(document).delegate('#mutedUsers', 'click', function(event) {
-            template = FirechatDefaultTemplates["templates/muted-Users.html"];
-
-            var list = window._mutedUsers;
+        onClick('mutedUsers', (event) => {
+            var list = get('mutedUsers');
             if (list === "") {
                 list = "No muted users";
             }
-            var $prompt = self.prompt('Muted Users', template({
+            var $prompt = this.prompt('Muted Users', {
                 list: list
-            }));
-            $prompt.find('a.close').first().click(function() {
-                $prompt.remove();
-                return false;
             });
 
-            $prompt.find('a.close').first().click(function() {
+            onClose($prompt, () => {
                 $prompt.remove();
-                return false;
-            });
-            $prompt.find('li').click(function() {
-
-                var id = $(this).closest('[data-id]').data('id');
-                self._chat.removeMutedUsers(id);
-                $prompt.remove();
-                return false;
             });
 
-
-
+            onClick('item', $prompt, () => {
+                var id = data('id');
+                this._chat.removeMutedUsers(id);
+                $prompt.remove();
+            });
         });
-    };
+    }
+
+    /**
+     * Binds a custom context menu to messages for superusers to warn or ban
+     * users for violating terms of service.
+     */
+    superuserUIEvents() {
+        parseMessageVars = function(event) {
+            return {
+                messageId: data('message-id'),
+                userId: data('user-id'),
+                roomId: data('room-id')
+            };
+        },
+        clearMessageContextMenus = function() {
+            // Remove any context menus currently showing.
+            forAll('firechat-contextmenu').each((menu) => {
+                menu.remove();
+            });
+
+            // Remove any messages currently highlighted.
+            forAll('.message.highlighted').each((msg) => {
+                msg.unHighlight();
+            });
+        },
+    }
 }

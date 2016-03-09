@@ -30,7 +30,6 @@
         this._userId = null;
         this._userName = null;
         this._isModerator = false;
-        
 
         // A unique id generated for each session.
         this._sessionId = null;

@@ -6,8 +6,8 @@ class Rooms {
         // Upon click of the dropdown, autofocus the input field and trigger list population.
         onClick('firechat-user-room-list-btn', (event) => {
             roomId = getData('room-id'),
-            targetId = $this.data('target'),
-            target = $('#' + targetId);
+            targetId = data('target'),
+            target = get(targetId);
 
             $target.empty();
             this._chat.getUsersByRoom(roomId, (users) => {
@@ -55,6 +55,29 @@ class Rooms {
                     this.roomList.append(roomItem.toggle(true));
                 }
             });
+        });
+    }
+
+    /**
+     * Binds to room dropdown button, menu items, and create room button.
+     */
+    roomListing() {
+        renderRoomList = function(event) {
+            var type = get('room-type');
+            self.sortListLexicographically('firechat-room-list', type);
+        };
+
+        // Handle click of the create new room prompt-button.
+        onClick('createRoomPromptButton', (event) => {
+            var login = Session.get('Firechat-Login');
+            self.promptCreateRoom(login);
+        });
+
+        // Handle click of the create new room button.
+        onClick('createRoomButton', (event) => {
+            var roomName = valueOf('firechat-input-room-name');
+            remove('firechat-prompt-create-room');
+            this._chat.createRoom(roomName, 'private');
         });
     }
 }

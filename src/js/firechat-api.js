@@ -3,53 +3,48 @@
 class FirechatApi {
     // Initialize the library and setup data listeners.
     setUser(userId, userName, callback) {
-        var self = this;
+        var this = this;
 
-        self._firebase.onAuth(function(authData) {
+        this._firebase.onAuth((authData) => {
 
             if (authData) {
-                self._userId = userId.toString();
+                this._userId = userId.toString();
                 root._userId = userId.toString();
 
-                self._userName = userName.toString();
-                self._userRef = self._firebase.child('users').child(self._userId);
-                self._loadUserMetadata(function() {
-                    root.setTimeout(function() {
-                        callback(self._user);
-                        self._setupDataEvents();
+                this._userName = userName.toString();
+                this._userRef = this._firebase.child('users').child(this._userId);
+                this._loadUserMetadata(() => {
+                    root.setTimeout(() => {
+                        callback(this._user);
+                        this._setupDataEvents();
                     }, 0);
                 });
-                self._getMutedUsers(self._userId);
+                this._getMutedUsers(this._userId);
             } else {
-                self.warn('Firechat requires an authenticated Firebase reference. Pass an authenticated reference before loading.');
+                this.warn('Firechat requires an authenticated Firebase reference. Pass an authenticated reference before loading.');
             }
 
         });
-    };
+    }
 
 
     setInvitedUser = function(userId) {
-        this._firebase.child('users').child(userId).on('value', function(data) {
-
+        this._firebase.child('users').child(userId).on('value', (data) => {
             var s = data.val();
             if (s === null) {
                 this._firebase.child('users').update({
                     userId: {
-                        "id": userId
+                        'id': userId
                     }
                 });
             }
-
-
         });
-    };
+    }
 
 
     // Resumes the previous session by automatically entering rooms.
-    Firechat.prototype.resumeSession = function(chatroom) {
-        
-
-        this._userRef.child('rooms').once('value', function(snapshot) {
+    resumeSession(chatroom) {
+        this._userRef.child('rooms').once('value', (snapshot) => {
             var rooms = snapshot.val();
             for (var roomId in rooms) {
                 if (rooms[roomId].type === 'private') {
@@ -57,12 +52,11 @@ class FirechatApi {
                 }
 
             }
-            
         }, /* onError */ function() {}, /* context */ this);
-    };
+    }
 
 
-    Firechat.prototype.removeSessions = function(callback) {
+    removeSessions(callback) {
         this._userRef.child('rooms').once('value', function(snapshot) {
             var rooms = snapshot.val();
             for (var roomId in rooms) {
@@ -73,19 +67,18 @@ class FirechatApi {
         }, /* onError */ function() {}, /* context */ this);
 
         callback();
-    };
+    }
 
 
     // Callback registration. Supports each of the following events:
-    Firechat.prototype.on = function(eventType, cb) {
+    on(eventType, cb) {
         this._addEventCallback(eventType, cb);
-    };
+    }
 
 
     // Create and automatically enter a new chat room.
-    Firechat.prototype.createRoom = function(roomName, roomType, callback) {
-        var self = this,
-            newRoomRef = this._roomRef.push();
+    createRoom(roomName, roomType, callback) {
+        var newRoomRef = this._roomRef.push();
         var newRoom = {
             id: newRoomRef.key(),
             name: roomName,
@@ -97,36 +90,34 @@ class FirechatApi {
             newRoom.authorizedUsers = {};
             newRoom.authorizedUsers[this._userId] = true;
         }
-        newRoomRef.set(newRoom, function(error) {
+        newRoomRef.set(newRoom, (error) => {
             if (!error) {
-                self.enterRoom(newRoomRef.key());
+                this.enterRoom(newRoomRef.key());
             }
             if (callback) {
                 callback(newRoomRef.key());
             }
         });
-    };
-
+    }
 
     // Enter a chat room.
-    Firechat.prototype.enterRoom = function(roomId) {
-        var self = this;
-        self.getRoom(roomId, function(room) {
+    enterRoom(roomId) {
+        this.getRoom(roomId, (room) => {
             var roomName = room.name;
             var type = room.type;
 
             if (!roomId || !roomName) return;
 
             // Skip if we're already in this room.
-            if (self._rooms[roomId]) {
+            if (this._rooms[roomId]) {
                 return;
             }
 
-            self._rooms[roomId] = true;
+            this._rooms[roomId] = true;
 
-            if (self._user) {
+            if (this._user) {
                 // Save entering this room to resume the session again later.
-                self._userRef.child('rooms').child(roomId).set({
+                this._userRef.child('rooms').child(roomId).set({
                     id: roomId,
                     name: roomName,
                     active: true,
@@ -135,113 +126,100 @@ class FirechatApi {
 
 
                 // Set presence bit for the room and queue it for removal on disconnect.
-                var presenceRef = self._firebase.child('room-users').child(roomId).child(self._userId).child(self._sessionId);
-                self._queuePresenceOperation(presenceRef, {
-                    id: self._userId,
-                    name: self._userName
+                var presenceRef = this._firebase.child('room-users').child(roomId).child(this._userId).child(this._sessionId);
+                this._queuePresenceOperation(presenceRef, {
+                    id: this._userId,
+                    name: this._userName
                 }, null);
             }
 
             // Invoke our callbacks before we start listening for new messages.
-            self._onEnterRoom({
+            this._onEnterRoom({
                 id: roomId,
                 name: roomName
             });
 
             // Setup message listeners
-            self._roomRef.child(roomId).once('value', function(snapshot) {
-                self._messageRef.child(roomId).limitToLast(self._options.numMaxMessages).on('child_added', function(snapshot) {
-                    self._onNewMessage(roomId, snapshot);
+            this._roomRef.child(roomId).once('value', (snapshot) => {
+                this._messageRef.child(roomId).limitToLast(this._options.numMaxMessages).on('child_added', (snapshot) => {
+                    this._onNewMessage(roomId, snapshot);
                 }, /* onCancel */ function() {
                     // Turns out we don't have permission to access these messages.
-                    self.leaveRoom(roomId, false);
-                }, /* context */ self);
+                    this.leaveRoom(roomId, false);
+                }, /* context */ this);
 
-                self._messageRef.child(roomId).limitToLast(self._options.numMaxMessages).on('child_removed', function(snapshot) {
-                    self._onRemoveMessage(roomId, snapshot);
-                }, /* onCancel */ function() {}, /* context */ self);
-            }, /* onFailure */ function() {}, self);
+                this._messageRef.child(roomId).limitToLast(this._options.numMaxMessages).on('child_removed', (snapshot) => {
+                    this._onRemoveMessage(roomId, snapshot);
+                }, /* onCancel */ () => {}, /* context */ this);
+            }, /* onFailure */ () => {}, this);
         });
-        
     };
 
     // Leave a chat room.
-    Firechat.prototype.leaveRoom = function(roomId, closebutton) {
-        var self = this,
-            userRoomRef = self._firebase.child('room-users').child(roomId);
+    leaveRoom(roomId, closebutton) {
+        var userRoomRef = this._firebase.child('room-users').child(roomId);
 
         // Remove listener for new messages to this room.
-        self._messageRef.child(roomId).off();
+        this._messageRef.child(roomId).off();
         if (closebutton) {
 
-            if (self._user) {
-                var presenceRef = userRoomRef.child(self._userId).child(self._sessionId);
+            if (this._user) {
+                var presenceRef = userRoomRef.child(this._userId).child(this._sessionId);
                 // Remove presence bit for the room and cancel on-disconnect removal.
-                self._removePresenceOperation(presenceRef.toString(), null);
+                this._removePresenceOperation(presenceRef.toString(), null);
                 // Remove session bit for the room.
-                self._userRef.child('rooms').child(roomId).remove();
+                this._userRef.child('rooms').child(roomId).remove();
             }
 
 
-            self._firebase.child('room-users').child(roomId).on('value', function(data) {
+            this._firebase.child('room-users').child(roomId).on('value', function(data) {
                 if (data.val()) {
                     console.log("Room still there");
                 }
-                // else
-                // {  
-                //    self._firebase.child('room-messages').child(roomId).remove();
-                //    console.log("Room not there");
-                // }
-
             });
 
 
 
         }
 
-        delete self._rooms[roomId];
+        delete this._rooms[roomId];
 
         // Invoke event callbacks for the room-exit event.
-        self._onLeaveRoom(roomId);
+        this._onLeaveRoom(roomId);
     };
 
-    Firechat.prototype.sendMessage = function(roomId, messageContent, messageType, cb) {
-        var self = this,
-            message = {
-                userId: self._userId,
-                name: self._userName,
-                timestamp: Firebase.ServerValue.TIMESTAMP,
-                message: messageContent,
-                type: messageType || 'default'
-            },
-            newMessageRef;
+    sendMessage(roomId, messageContent, messageType, cb) {
+        var message = {
+            userId: this._userId,
+            name: this._userName,
+            timestamp: Firebase.ServerValue.TIMESTAMP,
+            message: messageContent,
+            type: messageType || 'default'
+        },
+        newMessageRef;
 
-        if (!self._user) {
-            self._onAuthRequired();
+        if (!this._user) {
+            this._onAuthRequired();
             if (cb) {
                 cb(new Error('Not authenticated or user not set!'));
             }
             return;
         }
 
-        newMessageRef = self._messageRef.child(roomId).push();
+        newMessageRef = this._messageRef.child(roomId).push();
         newMessageRef.setWithPriority(message, Firebase.ServerValue.TIMESTAMP, cb);
     };
 
-    Firechat.prototype.deleteMessage = function(roomId, messageId, cb) {
-        var self = this;
-
-        self._messageRef.child(roomId).child(messageId).remove(cb);
+    deleteMessage(roomId, messageId, cb) {
+        this._messageRef.child(roomId).child(messageId).remove(cb);
     };
 
     // Mute or unmute a given user by id. This list will be stored internally and
     // all messages from the muted clients will be filtered client-side after
     // receipt of each new message.
-    Firechat.prototype.toggleUserMute = function(userId, name, cb) {
-        var self = this;
-
-        if (!self._user) {
-            self._onAuthRequired();
+    toggleUserMute(userId, name, cb) {
+        if (!this._user) {
+            this._onAuthRequired();
             if (cb) {
                 cb(new Error('Not authenticated or user not set!'));
             }
@@ -249,28 +227,26 @@ class FirechatApi {
         }
 
 
-        self._userRef.child('muted').child(userId).child(userId).transaction(function(isMuted) {
+        this._userRef.child('muted').child(userId).child(userId).transaction(function(isMuted) {
             return (isMuted) ? null : true;
         }, cb);
-        self._userRef.child('muted').child(userId).update({
+        this._userRef.child('muted').child(userId).update({
             username: name
         });
     };
 
-    Firechat.prototype.removeMutedUsers = function(id)
+    removeMutedUsers(id)
     {
-        var self = this;
-        self._userRef.child('muted').child(id).remove();
+        this._userRef.child('muted').child(id).remove();
     };
 
 
     // Send a moderator notification to a specific user.
-    Firechat.prototype.sendSuperuserNotification = function(userId, notificationType, data, cb) {
-        var self = this,
-            userNotificationsRef = self._firebase.child('users').child(userId).child('notifications');
+    sendSuperuserNotification(userId, notificationType, data, cb) {
+        var userNotificationsRef = this._firebase.child('users').child(userId).child('notifications');
 
         userNotificationsRef.push({
-            fromUserId: self._userId,
+            fromUserId: this._userId,
             timestamp: Firebase.ServerValue.TIMESTAMP,
             notificationType: notificationType,
             data: data || {}
@@ -279,20 +255,18 @@ class FirechatApi {
 
     // Warn a user for violating the terms of service or being abusive.
     Firechat.prototype.warnUser = function(userId) {
-        var self = this;
-        self.sendSuperuserNotification(userId, 'warning');
+        this.sendSuperuserNotification(userId, 'warning');
     };
 
     // Suspend a user by putting the user into read-only mode for a period.
     Firechat.prototype.suspendUser = function(userId, timeLengthSeconds, cb) {
-        var self = this,
-            suspendedUntil = new Date().getTime() + 1000 * timeLengthSeconds;
+        var suspendedUntil = new Date().getTime() + 1000 * timeLengthSeconds;
 
-        self._suspensionsRef.child(userId).set(suspendedUntil, function(error) {
+        this._suspensionsRef.child(userId).set(suspendedUntil, (error) => {
             if (error && cb) {
                 return cb(error);
             } else {
-                self.sendSuperuserNotification(userId, 'suspension', {
+                this.sendSuperuserNotification(userId, 'suspension', {
                     suspendedUntil: suspendedUntil
                 });
                 return cb(null);
@@ -303,34 +277,34 @@ class FirechatApi {
 
 
     // Invite a user to a specific chat room.
-    Firechat.prototype.inviteUser = function(userId, roomId, username, location, tHandle, atk, ats, message) {
+    inviteUser(userId, roomId, username, location, tHandle, atk, ats, message) {
         var present = false;
 
-        function sendInvite() {
-            self._firebase.child('users').child(userId).update({
+        var sendInvite = () => {
+            this._firebase.child('users').child(userId).update({
                 "id": userId,
                 "name": username
             });
-            var inviteRef = self._firebase.child('users').child(userId).child('invites').push();
+            var inviteRef = this._firebase.child('users').child(userId).child('invites').push();
             inviteRef.set({
                 id: inviteRef.key(),
-                fromUserId: self._userId,
-                fromUserName: self._userName,
+                fromUserId: this._userId,
+                fromUserName: this._userName,
                 roomId: roomId
             });
             // Handle listen unauth / failure in case we're kicked.
-            inviteRef.on('value', self._onFirechatInviteResponse, function() {}, self);
-        };
+            inviteRef.on('value', this._onFirechatInviteResponse, () => {}, this);
+        }
 
-        if (!self._user) {
-            self._onAuthRequired();
+        if (!this._user) {
+            this._onAuthRequired();
             return;
         }
 
-        self._firebase.child('users').child(userId).child('invites').on("value", function(val) {
+        this._firebase.child('users').child(userId).child('invites').on("value", (val) => {
             var obj = val.val();
             for (var v in obj) {
-                if (obj[v].fromUserId === self._userId) {
+                if (obj[v].fromUserId === this._userId) {
                     console.log(true);
                     present = true;
                     break;
@@ -340,16 +314,16 @@ class FirechatApi {
             if (present !== true) {
                 present = false;
                 if (Session.get("tweet") === "true") {
-                    Meteor.call('invitationForTweet', location, tHandle, atk, ats, message, function(err, response) {
+                    makeCall('invitationForTweet', location, tHandle, atk, ats, message, (err, response) => {
                         console.log('invitationForTweet');
                         //console.log(response);
                     });
                 }
 
-                self.getRoom(roomId, function(room) {
+                this.getRoom(roomId, (room) => {
                     if (room.type === 'private') {
-                        var authorizedUserRef = self._roomRef.child(roomId).child('authorizedUsers');
-                        authorizedUserRef.child(userId).set(true, function(error) {
+                        var authorizedUserRef = this._roomRef.child(roomId).child('authorizedUsers');
+                        authorizedUserRef.child(userId).set(true, (error) => {
                             if (!error) {
                                 sendInvite();
                             }
@@ -361,24 +335,19 @@ class FirechatApi {
             } else {
                 console.log("Invitation already sent");
             }
-
         });
-
-
-
-
     };
 
     acceptInvite(inviteId, cb) {
-        self._userRef.child('invites').child(inviteId).once('value', (snapshot) => {
+        this._userRef.child('invites').child(inviteId).once('value', (snapshot) => {
             var invite = snapshot.val();
             if (invite === null && cb) {
                 return cb(new Error('acceptInvite(' + inviteId + '): invalid invite id'));
             } else {
-                self.enterRoom(invite.roomId);
-                self._userRef.child('invites').child(inviteId).update({
+                this.enterRoom(invite.roomId);
+                this._userRef.child('invites').child(inviteId).update({
                     'status': 'accepted',
-                    'toUserName': self._userName
+                    'toUserName': this._userName
                 }, cb);
             }
         });
@@ -387,7 +356,7 @@ class FirechatApi {
     declineInvite(inviteId, cb) {
         updates = {
             'status': 'declined',
-            'toUserName': self._userName
+            'toUserName': this._userName
         };
 
         this._userRef.child('invites').child(inviteId).update(updates, cb);
@@ -401,7 +370,7 @@ class FirechatApi {
 
     getUsersByRoom() {
         var roomId = arguments[0],
-            query = self._firebase.child('room-users').child(roomId),
+            query = this._firebase.child('room-users').child(roomId),
             cb = arguments[arguments.length - 1],
             limit = null;
 

@@ -4,10 +4,9 @@ class Tabs {
      */
     bindTabControls() {
         // Handle click of tab close button.
-        $(document).delegate('[data-event="firechat-close-tab"]', 'click', (event) => {
-            var roomId = $(this).closest('[data-room-id]').data('room-id');
+        onClick('firechat-close-tab', (event) => {
+            var roomId = data('room-id');
             self._chat.leaveRoom(roomId, true);
-            return false;
         });
     };
 
@@ -19,7 +18,7 @@ class Tabs {
      */
     attachTab(roomId, roomName ,roomType) {
         // If this tab already exists, give it focus.
-        if (this.$messages[roomId]) {
+        if (this.messages[roomId]) {
             this.focusTab(roomId);
             return;
         }
@@ -29,7 +28,7 @@ class Tabs {
         };
 
         // Populate and render the tab content template.
-        var tabContent = $(tabTemplate(room));
+        var tabContent = get(tabTemplate(room));
         var messages = get('firechat-messages', roomId);
 
         // Keep a reference to the message listing for later use.
@@ -49,10 +48,10 @@ class Tabs {
 
         // Populate and render the tab menu template.
         if(roomType != "public") {
-         tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
+            tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
         }
         else {
-             tabListTemplate = FirechatDefaultTemplates["templates/public-tab-menu.html"];
+            tabListTemplate = FirechatDefaultTemplates["templates/public-tab-menu.html"];
         }
 
         var $tab = $(tabListTemplate(room));
@@ -65,15 +64,14 @@ class Tabs {
         // Dynamically update the width of each tab based upon the number open.
         var tabs = this.tabList.children('li');
         var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
-        this.$tabList.children('li').css('width', tabWidth);
 
         // Update the room listing to reflect that we're now in the room.
-        this.$roomList.children('[data-room-id=' + roomId + ']').children('a').addClass('highlight');
+        this.$roomList.children(roomId).setHighlight();
 
         // Sort each item in the user list alphabetically on click of the dropdown.
-        $('#firechat-btn-room-user-list-' + roomId).bind('click', function() {
+        onClick('firechat-btn-room-user-list', roomId, () => {
             self.sortListLexicographically('#firechat-room-user-list-' + roomId);
-            return false;
+            return;
         });
 
         // Automatically select the new tab.
@@ -87,10 +85,10 @@ class Tabs {
      * @param    {string}    roomId
      */
     focusTab(roomId) {
-        if (this.$messages[roomId]) {
-            var $tabLink = this.$tabList.find('[data-room-id=' + roomId + ']').find('a');
-            if ($tabLink.length) {
-                $tabLink.first().trigger('click');
+        if (this.messages[roomId]) {
+            var tab = get('room-id', roomId).tab();
+            if (tab) {
+                tab.trigger('click');
             }
         }
     };
@@ -102,23 +100,20 @@ class Tabs {
      * @param    {string}    roomId
      */
     removeTab(roomId) {
-        delete this.$messages[roomId];
+        delete this.messages[roomId];
 
         // Remove the inner tab content.
-        this.$tabContent.find('[data-room-id=' + roomId + ']').remove();
+        this.tabContent.find('room-id', roomId).remove();
 
         // Remove the tab from the navigation menu.
-        this.$tabList.find('[data-room-id=' + roomId + ']').remove();
+        this.tabList.find('room-id', roomId).remove();
 
         // Dynamically update the width of each tab based upon the number open.
-        var tabs = this.$tabList.children('li');
-        var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
-        this.$tabList.children('li').css('width', tabWidth);
 
         // Automatically select the next tab if there is one.
-        this.$tabList.find('[data-toggle="firechat-tab"]').first().trigger('click');
+        this.tabList.next('firechat-tab').trigger('click');
 
         // Update the room listing to reflect that we're now in the room.
-        this.$roomList.children('[data-room-id=' + roomId + ']').children('a').removeClass('highlight');
+        this.roomList.children('room-id', roomId).links().setHighlight();
     };
 }

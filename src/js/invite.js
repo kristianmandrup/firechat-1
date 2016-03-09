@@ -4,46 +4,36 @@ class Invite {
      * handles invitations as well as room creation and entering.
      */
     chatInvites() {
-        var self = this;
+        var renderInvitePrompt = (event) => {
+            var userId = data('user-id'),
+                roomId = data('room-id'),
+                userName = data('user-name');
 
-        var renderInvitePrompt = function(event) {
-            var $this = $(this),
-                userId = $this.closest('[data-user-id]').data('user-id'),
-                roomId = $this.closest('[data-room-id]').data('room-id'),
-                userName = $this.closest('[data-user-name]').data('user-name'),
-                template = FirechatDefaultTemplates["templates/prompt-invite-private.html"],
-                $prompt;
-
-            self._chat.getRoom(roomId, function(room) {
-                $prompt = self.prompt('Invite', template({
+            this._chat.getRoom(roomId, (room) => {
+                $prompt = this.prompt('Invite', {
                     userName: userName,
                     roomName: room.name
-                }));
-
-                $prompt.find('a.close').click(function() {
-                    $prompt.remove();
-                    return false;
                 });
 
-                $prompt.find('[data-toggle=decline]').click(function() {
+                $prompt.onClick('close', () => {
                     $prompt.remove();
-                    return false;
                 });
 
-                $prompt.find('[data-toggle=accept]').first().click(function() {
+                $prompt.onClick('decline', () => {
+                    $prompt.remove();
+                });
+
+                $prompt.onClick('accept', () => {
                     $prompt.remove();
                     self._chat.inviteUser(userId, roomId, room.name);
-                    return false;
                 });
-                return false;
             });
-            return false;
         };
 
         var renderPrivateInvitePrompt = function(event) {
             if (tabList.length < 3) {
-                    userId = getData('user-id');
-                    userName = getData('user-name');
+                    userId = data('user-id');
+                    userName = data('user-name');
 
                 if (userId && userName) {
                     $prompt = displayPrompt('Private Invite', {
@@ -51,15 +41,15 @@ class Invite {
                         roomName: 'Private Chat'
                     }));
 
-                    onClick('close', $prompt, () => {
+                    $prompt.onClick('close', () => {
                         $prompt.remove();
                     });
 
-                    onClick('decline', () => {
+                    $prompt.onClick('decline', () => {
                         $prompt.remove();
                     });
 
-                    onClick('accept', () => {
+                    $prompt.onClick('accept', () => {
                         $prompt.remove();
                         var roomName = 'Private Chat';
                         self._chat.createRoom(roomName, 'private', (roomId) => {
@@ -68,12 +58,10 @@ class Invite {
                     });
                 }
             } else {
-                var template2 = FirechatDefaultTemplates["templates/stop-invite.html"],
-                    $prompt2 = displayPrompt('Stop Invite', {});
+                $stopPrompt = displayPrompt('Stop Invite', {});
 
-                $prompt2.find('[data-toggle=decline]').click(function() {
-                    $prompt2.remove();
-                    return false;
+                $stopPrompt.onClick('decline', () => {
+                    $stopPrompt.remove();
                 });
             }
         };
@@ -84,7 +72,7 @@ class Invite {
                 maxLengthRoomName: this.maxLengthRoomName
             });
 
-            onClick('close', $prompt, () => {
+            $prompt.onClick('close', () => {
                 $prompt.remove();
                 return false;
             });

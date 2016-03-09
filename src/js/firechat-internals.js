@@ -2,19 +2,17 @@
 class Firechat {
     // Load the initial metadata for the user's account and set initial state.
     _loadUserMetadata(onComplete) {
-        var self = this;
-
         // Update the user record with a default name on user's first visit.
-        this._userRef.transaction(function(current) {
+        this._userRef.transaction((current) => {
             if (!current || !current.id || !current.name) {
                 return {
                     id: self._userId,
                     name: self._userName
                 };
             }
-        }, function(error, committed, snapshot) {
+        }, (error, committed, snapshot) => {
             self._user = snapshot.val();
-            self._moderatorsRef.child(self._userId).once('value', function(snapshot) {
+            self._moderatorsRef.child(self._userId).once('value', (snapshot) => {
                 self._isModerator = !!snapshot.val();
                 root.setTimeout(onComplete, 0);
             });
@@ -24,7 +22,7 @@ class Firechat {
     // Initialize Firebase listeners and callbacks for the supported bindings.
     _setupDataEvents() {
         // Monitor connection state so we can requeue disconnect operations if need be.
-        this._firebase.root().child('.info/connected').on('value', function(snapshot) {
+        this._firebase.root().child('.info/connected').on('value', (snapshot) => {
             if (snapshot.val() === true) {
                 // We're connected (or reconnected)! Set up our presence state.
                 for (var i = 0; i < this._presenceBits; i++) {
@@ -150,8 +148,7 @@ class Firechat {
 
     // Events to monitor chat invitations and invitation replies.
     _onFirechatInvite(snapshot) {
-        var self = this,
-            invite = snapshot.val();
+        var invite = snapshot.val();
 
         // Skip invites we've already responded to.
         if (invite.status) {
@@ -166,8 +163,7 @@ class Firechat {
     }
 
     _onFirechatInviteResponse(snapshot) {
-        var self = this,
-            invite = snapshot.val();
+        var invite = snapshot.val();
 
         invite.id = invite.id || snapshot.key();
         this._invokeEventCallbacks('room-invite-response', invite);
@@ -175,14 +171,14 @@ class Firechat {
 
     _getMutedUsers(id) {
       var self = this;
-      self._firebase.child('users').child(id).child('muted').on("value", function(val) {
+      self._firebase.child('users').child(id).child('muted').on("value", (val) => {
         var obj = val.val();
-        var list = "";
+        var list = [];
 
         for (var v in obj) {
-            var name = "<li data-id="+v+">"+obj[v].username+" <a> Unmute</a>";
+            var item = listItem(v, obj[v].username, 'Unmute');
 
-            list = list + name + "</li>";
+            list.push(item);
         }
         root._mutedUsers = list;
     }
