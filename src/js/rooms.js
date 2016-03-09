@@ -51,7 +51,7 @@ class Rooms {
                     if (room.type != 'public') continue;
                     room.isRoomOpen = !!this.messages[room.id];
                     var roomItem = getItem(room);
-                    roomItem.children('a').bind('click', selectRoomListItem);
+                    roomItem.onClick(selectRoomListItem);
                     this.roomList.append(roomItem.toggle(true));
                 }
             });

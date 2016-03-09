@@ -23,13 +23,13 @@ class ChatEventManager {
         }
     },
 
-    _onEnterRoom (room) {
+    _onEnterRoom(room) {
         this._chat.getRoom(room.id, (room) => {
             this.attachTab(room.id, room.name, room.type);
         });
     },
 
-    _onLeaveRoom (roomId) {
+    _onLeaveRoom(roomId) {
         this.removeTab(roomId);
 
         // Auto-enter rooms in the queue
@@ -83,7 +83,7 @@ class ChatEventManager {
     }
 
     // Events related to admin or moderator notifications.
-    _onNotification: function(notification) {
+    _onNotification(notification) {
         if (notification.notificationType === 'warning') {
             this.renderAlertPrompt('Warning', 'You are being warned for inappropriate messaging. Further violation may result in temporary or permanent ban of service.');
         } else if (notification.notificationType === 'suspension') {

@@ -16,18 +16,21 @@ class MessageContextMenu {
 
         this._chat.getRoom(messageVars.roomId, (room) => {
             // Show the context menu.
+            showMenu(room);
         });
-        this.configureEvents();
+        this._configureEvents();
     }
 
     // event handlers for Context menu
-    configureEvents() {
+    _configureEvents() {
         // Handle dismissal of message context menus (any non-right-click click event).
-        this.onClick('close-menu', (event) => {
+        this.onClick('close', (event) => {
             if (!event.button || event.button != 2) {
                 clearMessageContextMenus();
             }
         });
+
+        // TODO: should we have a resend also?
 
         // Handle display of message context menus (via right-click on a message).
         this.onClick('firechat-message', showMessageContextMenu);

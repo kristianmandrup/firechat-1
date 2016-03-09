@@ -43,7 +43,7 @@ class ChatAPI {
     }
 
     /**
-     * Toggle input field s if we want limit / unlimit input fields.
+     * Toggle input fields if we want limit / unlimit input fields.
      */
     toggleInputs(isEnabled) {
         find('firechat msg').each(() => {

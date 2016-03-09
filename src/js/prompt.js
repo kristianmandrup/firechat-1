@@ -14,8 +14,8 @@ class Prompt {
         });
 
 
-        onClick('submit', () => {
-            var name = $prompt.find('[data-input=firechat-room-name]').first().val();
+        onClick('submit', (e) => {
+            var name = $prompt.get('firechat-room-name').value();
             if (name !== '') {
                 self._chat.createRoom(name, 'public');
                 $prompt.remove();
@@ -25,8 +25,8 @@ class Prompt {
 
         focus('firechat-room-name]');
         onKeydown('firechat-room-name', (e) => {
-            if (e.which === 13) {
-                var name = $prompt.find('[data-input=firechat-room-name]').first().val();
+            if (e.ENTER) {
+                var name = $prompt.get('firechat-room-name').value();
                 if (name !== '') {
                     self._chat.createRoom(name, 'private');
                     $prompt.remove();
@@ -34,7 +34,7 @@ class Prompt {
                 }
             }
         });
-    };
+    }
 
     /**
      * Launch a prompt to tell the user to login
@@ -45,12 +45,11 @@ class Prompt {
         onClick('close', () => {
             $prompt.remove();
         });
-    };
+    }
 
 
     /**
       * Launch a prompt to allow the user to Add user handle.
-
       */
     promptInvite() {
         var $prompt = this.prompt('Invite User', template({
@@ -61,7 +60,7 @@ class Prompt {
         onClick('close', () => {
             $prompt.remove();
         });
-    };
+    }
 
 
     /**
@@ -74,5 +73,5 @@ class Prompt {
             title: title,
             content: content
         });
-    };
+    }
 }

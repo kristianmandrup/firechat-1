@@ -4,86 +4,84 @@ class UserUi {
      * active users currently in chat.
      */
     userSearch() {
-        var self = this,
-            handleUserSearchSubmit = function(event) {
-                var $this = $(this),
-                    targetId = $this.data('target'),
-                    controlsId = $this.data('controls'),
-                    templateId = $this.data('template'),
-                    prefix = $this.val() || $this.data('prefix') || '',
-                    startAt = $this.data('startAt') || null,
-                    endAt = $this.data('endAt') || null;
+        handleUserSearchSubmit = function(event) {
+            var $this = $(this),
+                targetId = $this.data('target'),
+                controlsId = $this.data('controls'),
+                templateId = $this.data('template'),
+                prefix = $this.val() || $this.data('prefix') || '',
+                startAt = $this.data('startAt') || null,
+                endAt = $this.data('endAt') || null;
 
-                event.preventDefault();
+            event.preventDefault();
 
-                userSearch(targetId, templateId, controlsId, prefix, startAt, endAt);
-            },
-            userSearch = function(targetId, templateId, controlsId, prefix, startAt, endAt) {
-                var $target = $('#' + targetId),
-                    $controls = $('#' + controlsId),
-                    template = FirechatDefaultTemplates[templateId];
+            userSearch(targetId, templateId, controlsId, prefix, startAt, endAt);
+        }
 
-                // Query results, filtered by prefix, using the defined startAt and endAt markets.
-                self._chat.getUsersByPrefix(prefix, startAt, endAt, self.maxUserSearchResults, function(users) {
-                    var numResults = 0,
-                        $prevBtn, $nextBtn, username, firstResult, lastResult;
+        userSearch = function(targetId, templateId, controlsId, prefix, startAt, endAt) {
+            var $target = $('#' + targetId),
+                $controls = $('#' + controlsId),
+                template = FirechatDefaultTemplates[templateId];
 
-                    $target.empty();
+            // Query results, filtered by prefix, using the defined startAt and endAt markets.
+            self._chat.getUsersByPrefix(prefix, startAt, endAt, self.maxUserSearchResults, function(users) {
+                var numResults = 0,
+                    $prevBtn, $nextBtn, username, firstResult, lastResult;
 
-                    for (username in users) {
-                        var user = users[username];
+                $target.empty();
 
-                        // Disable buttons for <me>.
-                        user.disableActions = (!self._user || user.id === self._user.id);
+                for (username in users) {
+                    var user = users[username];
 
-                        numResults += 1;
+                    // Disable buttons for <me>.
+                    user.disableActions = (!self._user || user.id === self._user.id);
 
-                        $target.append(template(user));
+                    numResults += 1;
 
-                        // If we've hit our result limit, the additional value signifies we should paginate.
-                        if (numResults === 1) {
-                            firstResult = user.name.toLowerCase();
-                        } else if (numResults >= self.maxUserSearchResults) {
-                            lastResult = user.name.toLowerCase();
-                            break;
-                        }
+                    $target.append(template(user));
+
+                    // If we've hit our result limit, the additional value signifies we should paginate.
+                    if (numResults === 1) {
+                        firstResult = user.name.toLowerCase();
+                    } else if (numResults >= self.maxUserSearchResults) {
+                        lastResult = user.name.toLowerCase();
+                        break;
                     }
+                }
 
-                    if ($controls) {
-                        $prevBtn = $controls.find('[data-toggle="firechat-pagination-prev"]');
-                        $nextBtn = $controls.find('[data-toggle="firechat-pagination-next"]');
+                if ($controls) {
+                    $prevBtn = $controls.find('[data-toggle="firechat-pagination-prev"]');
+                    $nextBtn = $controls.find('[data-toggle="firechat-pagination-next"]');
 
-                        // Sort out configuration for the 'next' button
-                        if (lastResult) {
-                            $nextBtn
-                                .data('event', 'firechat-user-search')
-                                .data('startAt', lastResult)
-                                .data('prefix', prefix)
-                                .removeClass('disabled').removeAttr('disabled');
-                        } else {
-                            $nextBtn
-                                .data('event', null)
-                                .data('startAt', null)
-                                .data('prefix', null)
-                                .addClass('disabled').attr('disabled', 'disabled');
-                        }
+                    // Sort out configuration for the 'next' button
+                    if (lastResult) {
+                        $nextBtn
+                            .data('event', 'firechat-user-search')
+                            .data('startAt', lastResult)
+                            .data('prefix', prefix)
+                            .removeClass('disabled').removeAttr('disabled');
+                    } else {
+                        $nextBtn
+                            .data('event', null)
+                            .data('startAt', null)
+                            .data('prefix', null)
+                            .addClass('disabled').attr('disabled', 'disabled');
                     }
-                });
-            };
+                }
+            });
+        });
 
-        $(document).delegate('[data-event="firechat-user-search"]', 'keyup', handleUserSearchSubmit);
-        $(document).delegate('[data-event="firechat-user-search"]', 'click', handleUserSearchSubmit);
+        onKeyup('firechat-user-search', handleUserSearchSubmit);
+        onClick('firechat-user-search', handleUserSearchSubmit);
 
-        // Upon click of the dropdown, autofocus the input field and trigger list population.
-        $(document).delegate('[data-event="firechat-user-search-btn"]', 'click', function(event) {
-            event.stopPropagation();
-            var $input = $(this).next('div.firechat-dropdown-menu').find('input');
-            $input.focus();
-            $input.trigger(jQuery.Event('keyup'));
+        // Upon click of the dropdown, autofocus the input field
+        // and trigger list population.
+        onClick('firechat-user-search-btn', (event) => {
+            next('firechat-dropdown-menu input');
         });
 
         // Ensure that the dropdown stays open despite clicking on the input element.
-        $(document).delegate('[data-event="firechat-user-search"]', 'click', function(event) {
+        onClick('firechat-user-search', (event) => {
             event.stopPropagation();
         });
     };
@@ -119,9 +117,6 @@ class UserUi {
                 this._chat.toggleUserMute(userId, userName);
             }
         });
-
-
-
 
         onClick('mutedUsers', (event) => {
             var list = get('mutedUsers');

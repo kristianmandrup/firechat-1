@@ -28,17 +28,17 @@ class Tabs {
         };
 
         // Populate and render the tab content template.
-        var tabContent = get(tabTemplate(room));
+        var tabContent = get(template(room));
         var messages = get('firechat-messages', roomId);
 
         // Keep a reference to the message listing for later use.
         this.messages[roomId] = messages;
 
         // Attach on-enter event to textarea.
-        var textarea = tabContent.find('textarea').first();
+        var textarea = tabContent.get('textarea');
         onKeyDown('textarea', function(e) {
             var message = self.trimWithEllipsis($textarea.val(), self.maxLengthMessage);
-            if ((e.which === 13) && (message !== '')) {
+            if ((e.ENTER) && (message !== '')) {
                 $textarea.val('');
                 self._chat.sendMessage(roomId, message);
                 return false;
@@ -46,15 +46,7 @@ class Tabs {
         });
         var tabListTemplate;
 
-        // Populate and render the tab menu template.
-        if(roomType != "public") {
-            tabListTemplate = FirechatDefaultTemplates["templates/tab-menu-item.html"];
-        }
-        else {
-            tabListTemplate = FirechatDefaultTemplates["templates/public-tab-menu.html"];
-        }
-
-        var $tab = $(tabListTemplate(room));
+        var $tab = template(room);
 
         // Attach on-shown event to move tab to front and scroll to bottom.
         onShow('tab', (event) => {
@@ -62,8 +54,6 @@ class Tabs {
         });
 
         // Dynamically update the width of each tab based upon the number open.
-        var tabs = this.tabList.children('li');
-        var tabWidth = Math.floor($('#firechat-tab-list').width() / tabs.length);
 
         // Update the room listing to reflect that we're now in the room.
         this.$roomList.children(roomId).setHighlight();
@@ -114,6 +104,6 @@ class Tabs {
         this.tabList.next('firechat-tab').trigger('click');
 
         // Update the room listing to reflect that we're now in the room.
-        this.roomList.children('room-id', roomId).links().setHighlight();
+        this.roomList.children('room-id', roomId).setHighlight();
     };
 }

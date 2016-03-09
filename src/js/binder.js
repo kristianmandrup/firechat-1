@@ -1,13 +1,14 @@
 class Binder {
-    constructor() {
+    constructor(ctx) {
+        this.ctx = ctx;
+        this._el = ctx.el;
     }
 
     /**
      * Binds to height changes in the surrounding div.
      */
     heightChange() {
-        var self = this,
-            $el = $(this._el),
+        var $el = $(this._el),
             lastHeight = null;
 
         setInterval(function() {
@@ -22,7 +23,6 @@ class Binder {
     }
 
 
-
     /**
      * Binds to any text input fields with data-provide='limit' and
      * data-counter='<selector>', and upon value change updates the selector
@@ -31,12 +31,11 @@ class Binder {
      */
     textInputFieldLimits() {
         onKeyUp('limit', (event) => {
-            var $this = $(this),
-                $target = $($this.data('counter')),
-                limit = $this.attr('maxlength'),
-                count = $this.val().length;
+            var $target = data('counter'),
+                limit = attr('maxlength'),
+                count = event.value().length;
 
-            $target.html(Math.max(0, limit - count));
+            $target.setValue(Math.max(0, limit - count));
         });
     };
 
