@@ -28,7 +28,7 @@ class FirechatApi {
     }
 
 
-    setInvitedUser = function(userId) {
+    setInvitedUser(userId) {
         this._firebase.child('users').child(userId).on('value', (data) => {
             var s = data.val();
             if (s === null) {
@@ -57,7 +57,7 @@ class FirechatApi {
 
 
     removeSessions(callback) {
-        this._userRef.child('rooms').once('value', function(snapshot) {
+        this._userRef.child('rooms').once('value', (snapshot) => {
             var rooms = snapshot.val();
             for (var roomId in rooms) {
                 if (rooms[roomId].name === 'Private Chat') {
@@ -162,7 +162,6 @@ class FirechatApi {
         // Remove listener for new messages to this room.
         this._messageRef.child(roomId).off();
         if (closebutton) {
-
             if (this._user) {
                 var presenceRef = userRoomRef.child(this._userId).child(this._sessionId);
                 // Remove presence bit for the room and cancel on-disconnect removal.
@@ -177,9 +176,6 @@ class FirechatApi {
                     console.log("Room still there");
                 }
             });
-
-
-
         }
 
         delete this._rooms[roomId];
@@ -235,8 +231,7 @@ class FirechatApi {
         });
     };
 
-    removeMutedUsers(id)
-    {
+    removeMutedUsers(id) {
         this._userRef.child('muted').child(id).remove();
     };
 
@@ -254,12 +249,12 @@ class FirechatApi {
     };
 
     // Warn a user for violating the terms of service or being abusive.
-    Firechat.prototype.warnUser = function(userId) {
+    warnUser(userId) {
         this.sendSuperuserNotification(userId, 'warning');
     };
 
     // Suspend a user by putting the user into read-only mode for a period.
-    Firechat.prototype.suspendUser = function(userId, timeLengthSeconds, cb) {
+    suspendUser = function(userId, timeLengthSeconds, cb) {
         var suspendedUntil = new Date().getTime() + 1000 * timeLengthSeconds;
 
         this._suspensionsRef.child(userId).set(suspendedUntil, (error) => {

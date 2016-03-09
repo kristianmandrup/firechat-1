@@ -1,4 +1,4 @@
-class ChatAPI {
+class UiChatAPI {
     /**
      * Initialize an authenticated session with a user id and name.
      * This method assumes that the underlying Firebase reference has

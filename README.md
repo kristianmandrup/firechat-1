@@ -11,13 +11,211 @@ It works out of the box, and can be extended.
 
 This version of Firechat has undegone major refactoring/cleanup in order to make it more declarative. The code of the massive `.js` files has now been divided into logical units for a better overview. ES6 syntax is used, includding: arrow functions, classes and modules.
 
-### chat-api.js
+### firechat.js
+
+`Firechat(firebaseRef, options)`
+
+Creates main Firechat object instance using ref to firebase.
+
+* Instantiate a new connection to Firebase*
+`_firebase = firebaseRef`
+
+*User-specific instance variables*
+
+`_user`
+`_userId`
+`_userName`
+`_isModerator = false`
+
+*Commonly-used Firebase references*
+
+Each value references is a child node in firebase that the chat listens to.
+
+`_userRef` : `null`
+`_messageRef`: `room-messages`
+`_roomRef`: `room-metadata`
+`_roomUsers`: `room-users`
+`_privateRoomRef`: `room-private-metadata`
+`_moderatorsRef`: `moderators`
+`_suspensionsRef`: `suspensions`
+`_usersOnlineRef`: `user-names-online`
+
+Unique id generated for each session.
+
+`_sessionId`
+
+Mapping of event IDs to an array of callbacks.
+
+`_events = {}`
+
+Mapping of room IDs to a boolean indicating presence.
+
+`_rooms = {}`
+
+Mapping of operations to re-queue on disconnect.
+
+`_presenceBits = {}`
+
+`_options = options || {}`
+
+The number of historical messages to load per room.
+
+`_options.numMaxMessages = _options.numMaxMessages || 50`
+
+### firechat-api.js
+
+`setUser(userId, userName, callback)`
+
+Attempt to authenticate via `this._firebase.onAuth((authData) => { ... })`
+
+On successful auth, configures `_userRef` to listen to the user with `userId` in `users` firebase collection.
+
+`setInvitedUser(userId)`
+
+Listens for any update for user with invite id, then sets current `userId` to this id (assuming invite is accepted on update).
+
+`resumeSession(chatroom)`
+
+Resumes the previous session by automatically entering rooms.
+
+`removeSessions(callback)`
+
+Kicked out of private chat for any rooms that change!?
+
+`createRoom(roomName, roomType, callback)`
+
+Create and automatically enter a new chat room.
+
+`enterRoom(roomId)`
+
+Enter a room by `roomId`. Called by `createRoom`.
+- Skip if we're already in this room.
+- Save entering this room to resume the session again later.
+- Set presence bit for the room and queue it for removal on disconnect.
+
+Enter room by: `_onEnterRoom(roomId, roomName)`
+
+Sets up listeners for room:
+- `_onNewMessage` or `leaveRoom` on child node added for room
+- `_onRemoveMessage` on child node removed from room
+
+`leaveRoom(roomId, closebutton)`
+
+Remove listener for new messages to this room.
+
+If room is closed by the user
+- Remove presence bit for the room and cancel on-disconnect removal.
+- Remove session bit for the room.
+
+Calls `_onLeaveRoom(roomId)` to nofify!
+
+`sendMessage(roomId, messageContent, messageType, cb)`
+
+Sends a message to the given room.
+If there is no user, require authentication and throw error.
+
+Sets new message using [setWithPriority](https://www.firebase.com/docs/web/api/firebase/setwithpriority.html) and `Firebase.ServerValue.TIMESTAMP` to make sure higher timestamp has higher priority and is listed accordingly!
+
+`deleteMessage(roomId, messageId, cb)`
+
+Deletes a message from the room
+
+`toggleUserMute(userId, name, cb)`
+
+Toggles user mute status on/off.
+
+`removeMutedUsers(id)`
+
+Remove a muted user by Id
+
+`sendSuperuserNotification(userId, notificationType, data, cb)`
+
+Notify superuser with a specific message, such as a warning or suspension of a user (content violation).
+
+`warnUser(userId)`
+
+Warn a user for violating the terms of service or being abusive.
+
+`suspendUser(userId, timeLengthSeconds, cb)`
+
+Suspend a user by putting the user into read-only mode for a period.
+
+`inviteUser(userId, roomId, username, location, tHandle, atk, ats, message)`
+
+Invite a user to a specific chat room.
+A lot of stuff here!!
+
+`acceptInvite(inviteId, cb)`
+
+Enter room of invite and set invite accepted in firebase (to notify the inviter).
+
+`declineInvite(inviteId, cb)`
+
+Set decline invite in firebase (to notify the inviter).
+
+`getRoomList(cb)`
+
+Get list of rooms and return snapshot of value (live reference).
+
+`getUsersByRoom()`
+
+Get users for each room, by a query: `_firebase.child('room-users').child(roomId)`. For each username, iterate current sessions and use the first one.
+
+```js
+for (var session in usernames[username]) {
+    // Skip all other sessions for this user as we only need one.
+    usernamesUnique[username] = usernames[username][session];
+    break;
+}
+```
+
+Return map (object) keyed by unique user names, with a session for each.
+
+`getUsersByPrefix(prefix, startAt, endAt, limit, cb)`
+
+Queries Firebase for users by prefix (name, lowercase) and start/end, limit range. Used to search for specific users.
+
+*Helper methods*
+
+`getRoom(roomId, callback)`
+
+Get room by id and return snapshot of value (live reference).
+
+`userIsModerator()`
+
+Determine if current user is a moderator
+
+`warn(msg)`
+
+Write a warning message
+
+### firechat-internals.js
+
+Private (internal) methods used by `firechat-api`
+
+### ui-chat-api.js
 
 The external API of Firebase
 
 `setUser(userId, userName, chatroom)`
 
-initiate chat in a chat room
+Initialize an authenticated session with a user id and name.
+This method assumes that the underlying Firebase reference has
+already been authenticated.
+
+Initiates chat by calling `_chat.setUser(userId, userName, (user) => { ... }`
+
+`on(eventType, cb)`
+
+Exposes internal chat bindings via this external interface.
+
+`renderAlertPrompt(title, message)`
+
+Given a title and message content, show an alert prompt to the user.
+
+`toggleInputs(isEnabled)`
+
+Toggle input fields if we want limit / unlimit input fields.
 
 ### message.js
 
@@ -184,7 +382,6 @@ Events related to admin or moderator notifications.
 - `warning` : alert prompt with suspension warning
 - `suspension` : alert prompt that you are being suspended with a count down of time remaining
 
-
 ### invite.js
 
 handles invitations as well as room creation and entering.
@@ -204,6 +401,50 @@ want to stop for more invites.
 
 Prompts to add people to group and also asks for and handles Twitter tweet permissions.
 
+## firechat-ui.js
+
+    _bindUIEvents() {
+        // Chat-specific custom interactions and functionality.
+        this.binder.heightChange();
+        this.binder.tabControls();
+
+        this.rooms.roomList();
+        this.room.roomListing();
+
+        this.user.userRoomList();
+        this.user.userSearch();
+        this.user.userMuting();
+        this.invite.chatInvites();
+
+        // Generic, non-chat-specific interactive elements.
+        this._setupTabs();
+        this._setupDropdowns();
+        this._bindTextInputFieldLimits();
+    }
+
+`_bindDataEvents`
+
+`user-update`: `_onUpdateUser`
+
+Bind events for new messages, enter / leaving rooms, and user metadata.
+
+`room-enter`: `_onEnterRoom`
+`room-exit`: `_onLeaveRoom`
+`message-add`: `_onNewMessage`
+`message-remove`, `_onRemoveMessage`
+
+Bind events related to chat invitations.
+
+`room-invite`: `_onChatInvite`
+`room-invite-response`: `_onChatInviteResponse`
+
+Binds events related to admin or moderator notifications.
+
+`notification`: `_onNotification`
+
+### Display the chat
+
+`_renderLayout()`
 
 
 ## Live Demo

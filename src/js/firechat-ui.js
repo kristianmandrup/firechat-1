@@ -61,14 +61,16 @@ class FirechatUI {
 
     _bindUIEvents() {
         // Chat-specific custom interactions and functionality.
-        this._bindForHeightChange();
-        this._bindForTabControls();
-        this._bindForRoomList();
-        this._bindForUserRoomList();
-        this._bindForUserSearch();
-        this._bindForUserMuting();
-        this._bindForChatInvites();
-        this._bindForRoomListing();
+        this.binder.heightChange();
+        this.binder.tabControls();
+
+        this.rooms.roomList();
+        this.room.roomListing();
+
+        this.user.userRoomList();
+        this.user.userSearch();
+        this.user.userMuting();
+        this.invite.chatInvites();
 
         // Generic, non-chat-specific interactive elements.
         this._setupTabs();
