@@ -5,6 +5,29 @@
 Firechat is a chat widget powered by [Firebase](https://www.firebase.com/?utm_source=firechat).
 It is intended to serve as a concise, documented foundation for chat products built on Firebase.
 
+## [API overview](https://firechat.firebaseapp.com/docs/#api)
+
+*Event types*
+
+- `user-update` user's metadata changes.
+- `room-enter` user successfully enters a room.
+- `room-exit` user exists a room.
+- `message-add` new message is received.
+- `message-remove` message is deleted.
+- `room-invite` new room invite is received.
+- `room-invite-response` response to invite is received.
+
+## [firebase data structure](https://firechat.firebaseapp.com/docs/#data_structure)
+
+*Collections*
+
+- moderators
+- room-messages
+- room-metadata
+- room-users
+- user-names-online
+- users
+
 ## Refactor
 
 This version of Firechat has undegone major refactoring/cleanup in order to make it more declarative and remove dependencies and loads of ugly hard-coded duplication. It is a WIP.
