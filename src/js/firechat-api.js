@@ -254,7 +254,7 @@ class FirechatApi {
     };
 
     // Suspend a user by putting the user into read-only mode for a period.
-    suspendUser = function(userId, timeLengthSeconds, cb) {
+    suspendUser(userId, timeLengthSeconds, cb) {
         var suspendedUntil = new Date().getTime() + 1000 * timeLengthSeconds;
 
         this._suspensionsRef.child(userId).set(suspendedUntil, (error) => {
